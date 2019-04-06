@@ -234,7 +234,7 @@ $(document).ready(function() {
 	$("#fileList").DataTable({
 		
 	    "columnDefs": [{
-	        "defaultContent": "-",
+	        "defaultContent": "",
 	        "targets": "_all"
 	      }],
 	      
@@ -242,7 +242,7 @@ $(document).ready(function() {
 			"emptyTable": "데이터가 없습니다.",
 			"lengthMenu": "페이지당 _MENU_ 개씩 보기",
 			"info": "",
-			"infoEmpty": "-",
+			"infoEmpty": "",
 			"infoFiltered": "( _MAX_건의 데이터에서 필터링됨 )",
 			"search": "검색 : ",
 			"zeroRecords": "일치하는 데이터가 없습니다.",
@@ -350,7 +350,7 @@ $(document).ready(function() {
 		},
 	
 		pageLength: 100,
-		bPaginate: false,
+		bPaginate: true,
 		responsive: true,
 		processing: true,
 		ordering: false,
@@ -413,7 +413,7 @@ $(document).ready(function() {
 					 btnStr = "<a href=\"#\" onclick=\"setReplyNo('" + data + "')\" class=\"btn btn-success btn-icon-split\" data-toggle=\"modal\" data-target=\"#replyModal\">";
 					 btnStr+= "<span class=\"text\">답글</span>";
 					 btnStr+= "</a> ";
-					 btnStr+= "<a href=\"#\" onclick=\"setReplyNo('" + data + "');setUpdateBtn();\" class=\"btn btn-warning btn-icon-split\" data-toggle=\"modal\" data-target=\"#replyModifyModal\">";
+					 btnStr+= "<a href=\"#\" onclick=\"setReplyNo('" + data + "'); setReplyData('" + data + "');\" class=\"btn btn-warning btn-icon-split\" data-toggle=\"modal\" data-target=\"#replyModifyModal\">";
 					 btnStr+= "<span class=\"text\">수정</span>";
 					 btnStr+= "</a> ";
 					 btnStr+= "<a href=\"#\" onclick=\"deleteReply('" + data + "')\" class=\"btn btn-danger btn-icon-split\">";
@@ -435,7 +435,7 @@ $(document).ready(function() {
 		
 		var data = {
 			boardNo: bNo,
-		    content: $("#reply_contents").val(),
+		    content: $("#replyModal #reply_contents").val(),
 		    delFlag: "N",
 		    writer: "test",
 		    groupNo: ($("#group_no").val()) ? $("#group_no").val() : 0,
@@ -454,6 +454,7 @@ $(document).ready(function() {
 	        success:function(result){   
 	        	
 	        	alert("등록되었습니다.");
+	        	location.href = "/board/detail/" + bNo;   
 	        	
 	        }, 
 	        error:function(e){  
@@ -467,15 +468,15 @@ $(document).ready(function() {
 	// 댓글수정
 	$("#btn-reply-mod").on("click", function () {
 		
-		var rNo = $("#reply_no").val(n);
+		var bNo = $("#no").val();
+		var rNo = $("#reply_no").val();
 		
 		var data = {
-		    title: $("#title").val(),
-		    content: $("#contents").val(),
+			boardNo: bNo,
+		    content: $("#replyModifyModal #reply_contents").val(),
 		    delFlag: "N",
-		    modifyDate: $("#modify_date").val(),
-		    regDate: $("#reg_date").val(),
-		    writer: "test"
+		    writer: "test",
+			parentNo: (rNo) ? rNo : 0
 		};
 		
 	    $.ajax({
@@ -487,7 +488,7 @@ $(document).ready(function() {
 	        success:function(args){   
 	        	
 	        	alert("수정되었습니다.")
-		        location.href = "/board/detail/" + $("#no").val();   
+		        location.href = "/board/detail/" + bNo;   
 	        	
 	        }, 
 	        error:function(e){  
@@ -504,13 +505,28 @@ $(document).ready(function() {
 
 // 답글의 댓글 번호 설정
 function setReplyNo(n) {
-	$("#reply_no").val(n);
+	$("#reply_no").val(n); 
 }
 
-// 댓글 수정 버튼 생성
-function setUpdateBtn() {
-	//$("#btn-reply-reply-save").attr("class", "btn btn-warning btn-icon-split");
-	//$("#btn-reply-reply-save").attr("id", "btn-reply-mod");
+// 댓글 수정 데이터 설정
+function setReplyData(n) {
+	
+	$.ajax({
+        type: "POST",
+        url: "/reply/getReply/" + n,
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success:function(result){   
+        	
+        	// 기존 내용 설정
+        	$("#replyModifyModal #reply_contents").val(result.content);
+        }, 
+        error:function(e){  
+            alert(e.responseText);  
+        } 
+
+    });
+	
 }
 
 // 댓글 삭제
@@ -522,6 +538,7 @@ function deleteReply(rNo) {
         success:function(args){   
         	
         	alert("삭제되었습니다.");
+        	location.href = "/board/detail/" + $("#no").val();   
         	
         }, 
         error:function(e){  

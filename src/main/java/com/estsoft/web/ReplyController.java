@@ -141,12 +141,10 @@ public class ReplyController {
 	//───────────────────────────────────────
 	// 수정
 	//───────────────────────────────────────
-	@GetMapping("/modify/{rNo}")
-	public String modify(@PathVariable int rNo, Model model) {
-		
-		model.addAttribute("reply", replyRepository.findOne(rNo));
-		
-		return "/reply/modify";
+	@PostMapping("/getReply/{rNo}")
+	@ResponseBody
+	public Reply getReply(@PathVariable int rNo) {
+		return replyRepository.findOne(rNo);
 	}
 	
 	@PutMapping("/update/{rNo}")
@@ -154,14 +152,12 @@ public class ReplyController {
 	public Reply update(@PathVariable int rNo, @RequestBody Reply reply) {
 		
 		Reply updateReply = replyRepository.findOne(rNo);
-		reply.setNo(rNo);
 		
-		// 수정 시 기존 사항 반영
-		reply.setGroupNo(updateReply.getGroupNo());
-		reply.setGroupSeq(updateReply.getGroupSeq());
+		// 수정 시 내용 이외 기존 사항 반영
+		updateReply.setContent(reply.getContent());
 		
 		// 수정일자를 오늘로 지정
-		reply.setModifyDate(new Date());
+		updateReply.setModifyDate(new Date());
 		
 		return replyRepository.save(reply);
 	}
