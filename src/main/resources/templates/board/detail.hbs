@@ -1,4 +1,4 @@
- {{> include/top}}
+ {{> board/include/top}}
 <body id="page-top">
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -6,7 +6,7 @@
 	<div id="content-wrapper" class="d-flex flex-column">
 		<!-- Main Content -->
 		<div id="content">
-			 {{> include/header}} 
+			 {{> board/include/header}} 
 			<!-- Begin Page Content -->
 			<div class="container-fluid">
 				<!-- DataTales Example -->
@@ -25,7 +25,7 @@
 							<form name="form">
 								<input type="hidden" class="form-control" id="no" value="{{board.no}}">
 								<tr class="form-group">
-									<td width="15%">
+									<td width="15%" align="center" style="vertical-align:middle">
 										 내용
 									</td>
 									<td>
@@ -33,19 +33,19 @@
 									</td>
 								</tr>
 								<tr class="form-group">
-									<td>
+									<td align="center">
 										 등록일자
 									</td>
 									<td>
-										 {{dateFormat board.regDate format="YYYY.MM.dd"}}
+										 {{formattedRegDate}}
 									</td>
 								</tr>
 								<tr class="form-group">
-									<td>
+									<td align="center">
 										 수정일자
 									</td>
 									<td>
-										 {{dateFormat board.modifyDate format="YYYY.MM.dd"}}
+										 {{formattedModifyDate}}
 									</td>
 								</tr>
 							</form>
@@ -86,11 +86,11 @@
 			<!-- /.container-fluid -->
 		</div>
 		<!-- End of Main Content -->
-		 {{> include/footer}}
+		 {{> board/include/footer}}
 	</div>
 	<!-- End of Content Wrapper -->
 </div>
 <!-- End of Page Wrapper -->
- {{> include/scroll}} 
+ {{> board/include/scroll}} 
 
 </body>

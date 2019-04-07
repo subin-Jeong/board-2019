@@ -1,6 +1,6 @@
-// 리스트
 $(document).ready(function() {
 	
+	// 목록 불러오기
 	$("#boardList").DataTable({
 		
 	    "columnDefs": [

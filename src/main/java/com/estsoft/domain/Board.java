@@ -1,6 +1,7 @@
 package com.estsoft.domain;
 
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -83,6 +84,10 @@ public class Board {
 	public Date getRegDate() {
 		return regDate;
 	}
+	
+	public String getFormattedRegDate() {
+		return getFormattedDate(this.regDate, "yyyy.MM.dd HH:mm:ss");
+	}
 
 	public void setRegDate(Date regDate) {
 		this.regDate = regDate;
@@ -90,6 +95,10 @@ public class Board {
 
 	public Date getModifyDate() {
 		return modifyDate;
+	}
+	
+	public String getFormattedModifyDate() {
+		return getFormattedDate(this.modifyDate, "yyyy.MM.dd HH:mm:ss");
 	}
 
 	public void setModifyDate(Date modifyDate) {
@@ -135,6 +144,14 @@ public class Board {
 	public void setDepth(int depth) {
 		this.depth = depth;
 	}
+	
+	// Date 포맷 변경
+	private String getFormattedDate(Date date, String format) {
+        if (date == null) {
+            return "";
+        }
+        return new SimpleDateFormat(format).format(date);
+    }
 
 	@Override
 	public String toString() {

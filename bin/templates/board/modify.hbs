@@ -1,4 +1,4 @@
- {{> include/top}}
+ {{> board/include/top}}
 <body id="page-top">
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -6,7 +6,7 @@
 	<div id="content-wrapper" class="d-flex flex-column">
 		<!-- Main Content -->
 		<div id="content">
-			 {{> include/header}} 
+			 {{> board/include/header}} 
 			<!-- Begin Page Content -->
 			<div class="container-fluid">
 				<!-- DataTales Example -->
@@ -21,7 +21,7 @@
 							<tbody>
 							<form name="form">
 								<tr class="form-group">
-									<td width="20%">
+									<td width="20%" align="center">
 										 번호
 									</td>
 									<td>
@@ -29,7 +29,7 @@
 									</td>
 								</tr>
 								<tr class="form-group">
-									<td>
+									<td align="center">
 										 제목
 									</td>
 									<td>
@@ -37,7 +37,7 @@
 									</td>
 								</tr>
 								<tr class="form-group">
-									<td>
+									<td align="center" style="vertical-align:middle">
 										 내용
 									</td>
 									<td>
@@ -90,12 +90,12 @@
 			<!-- /.container-fluid -->
 		</div>
 		<!-- End of Main Content -->
-		 {{> include/footer}}
+		 {{> board/include/footer}}
 	</div>
 	<!-- End of Content Wrapper -->
 </div>
 <!-- End of Page Wrapper -->
- {{> include/scroll}} 
+ {{> board/include/scroll}} 
 
 <!-- custom JavaScript -->
 <script src="{{springMacroRequestContext.request.contextPath}}/js/board/script.upload.js"></script>

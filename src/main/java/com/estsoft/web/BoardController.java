@@ -85,9 +85,11 @@ public class BoardController {
 	@GetMapping("/detail/{bNo}")
 	public String detail(@PathVariable int bNo, Model model) {
 		
-		System.out.println(boardRepository.findOne(bNo).toString());
+		Board board = boardRepository.findOne(bNo);
 		
-		model.addAttribute("board", boardRepository.findOne(bNo));
+		model.addAttribute("board", board);
+		model.addAttribute("formattedRegDate", board.getFormattedRegDate());
+		model.addAttribute("formattedModifyDate", board.getFormattedModifyDate());
 		
 		return "/board/detail";
 	}
