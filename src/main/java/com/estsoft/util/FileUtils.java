@@ -74,7 +74,7 @@ public class FileUtils {
 	 * @param originalName
 	 * @param fileData
 	 * @return 업로드된 전체 파일경로
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	public static String uploadFile(String uploadPath, String originalName, byte[] fileData) throws Exception {
 		
