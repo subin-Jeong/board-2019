@@ -3,11 +3,11 @@ $(document).ready(function() {
 	
 	$("#boardList").DataTable({
 		
-	
-	    "columnDefs": [{
-	        "defaultContent": "-",
-	        "targets": "_all"
-	      }],
+	    "columnDefs": [
+	        { targets: "_all", defaultContent: "-" },
+	        { targets: [0, 2, 3], className: "dt-body-center" },
+	        { targets: [1], className: "dt-body-left" }
+	      ],
 	      
 		"language": {
 			"emptyTable": "데이터가 없습니다.",
@@ -19,8 +19,10 @@ $(document).ready(function() {
 			"zeroRecords": "일치하는 데이터가 없습니다.",
 			"loadingRecords": "로딩중...",
 			"processing": "잠시만 기다려 주세요...",
-			"next": "다음",
-			"previous": "이전"
+			"paginate": {
+				"previous": "이전",
+				"next": "다음"
+			}
 		},
 	
 		pageLength: 100,
@@ -77,9 +79,7 @@ $(document).ready(function() {
 				        
 				 }
 			},
-			{ data: "depth" },
-			{ data: "groupNo" },
-			{ data: "groupSeq" }]
+			{ data: "writer" }]
 	
 	});
 
@@ -110,43 +110,8 @@ $(document).ready(function() {
 	        data: JSON.stringify(data),
 	        success:function(result){   
 	        	
-	        	// 첨부파일
-	    		// 1. Ctrl + V 한 이미지 파일
-	        	
-	        	var uploadData = {};
-	        	
-	    		// 연관 글번호
-	    		uploadData["boardNo"] = result["no"];
-	    		
-	    		imgCnt = 0;
-	    		$("#uploadFiles").find("img").each( function() {
-	    			
-	    			imgCnt++;
-	    			uploadData["url" + imgCnt] = $(this).attr("src");
-	    	    });
-	    		
-	    		
-	    		// 첨부파일이 있는 경우
-	    		if(Object.keys(uploadData).length > 1) {
-	    			
-	    			$.ajax({
-	    		        type: "POST",
-	    		        url: "/board/upload",
-	    		        dataType: "json",
-	    		        contentType: "application/json; charset=utf-8",
-	    		        data: JSON.stringify(uploadData),
-	    		        success:function(args){   
-	    		        	alert("첨부파일이 등록되었습니다.");
-	    		        }, 
-	    		        error:function(e){  
-	    		            alert("첨부파일 등록에 실패했습니다.");  
-	    		            return;
-	    		        } 
-	    		
-	    		    });
-	    			
-	    		}
-	        	
+	        	// 첨부파일 DB 저장
+	        	saveFile(result["no"]);
 	        	
 	        	alert("등록되었습니다.");
 		        location.href = "/board/list";   
@@ -180,7 +145,10 @@ $(document).ready(function() {
 	        dataType: "json",
 	        contentType: "application/json; charset=utf-8",
 	        data: JSON.stringify(data),
-	        success:function(args){   
+	        success:function(result){   
+	        	
+	        	// 첨부파일 DB 저장
+	        	saveFile(result["no"]);
 	        	
 	        	alert("수정되었습니다.")
 		        location.href = "/board/detail/" + $("#no").val();   
@@ -247,9 +215,7 @@ $(document).ready(function() {
 			"search": "검색 : ",
 			"zeroRecords": "일치하는 데이터가 없습니다.",
 			"loadingRecords": "로딩중...",
-			"processing": " 잠시만 기다려 주세요... ",
-			"next": "다음",
-			"previous": "이전"
+			"processing": " 잠시만 기다려 주세요... "
 		},
 		bPaginate: false,
 		responsive: false,
@@ -266,13 +232,33 @@ $(document).ready(function() {
 				"render": function(data, type, row){
 				
 			        if(type=="display"){
-			            viewImgHTML = "<img src=\"/upload/" + data + "\">";
+			        	
+			        	if(data.substring(0,1) == "/") {
+			        		return "<img src=\"/upload" + data + "\">";
+			        	} else {
+			        		return "<img src=\"/upload/" + data + "\">";
+			        	}
+			            
 			        }
-			        return viewImgHTML;
 			    }
 			
 			},
-			{ data: "filename" },
+			{ data: "filename",
+				
+				"render": function(data, type, row){
+					
+			        if(type=="display"){
+			        	
+			        	if(data.substring(0,1) == "/") {
+			        		return "<a href=\"/upload" + data + "\" style=\"text-decoration:none;\">" + data.substring(data.lastIndexOf("_") + 1) + "</a>";
+			        	} else {
+			        		return "<a href=\"/upload/" + data + "\" style=\"text-decoration:none;\">" + data + "</a>";
+			        	}   
+			        }
+			        
+			    }
+			
+			},
 			{ data: "regDate",
 				 
 				 "render": function(data, type){
@@ -284,6 +270,17 @@ $(document).ready(function() {
 						 return "";
 					 }
 				        
+				 }
+			},
+			{ data: "no",
+				 
+				 "render": function(data, type){
+					 	
+					 btnStr = "<a href=\"#\" onclick=\"deleteFile('" + data + "')\" class=\"btn btn-danger btn-icon-split\">";
+					 btnStr+= "<span class=\"text\">삭제</span>";
+					 btnStr+= "</a>";
+				     
+					 return btnStr;
 				 }
 			}]
 	
@@ -345,8 +342,10 @@ $(document).ready(function() {
 			"zeroRecords": "일치하는 데이터가 없습니다.",
 			"loadingRecords": "로딩중...",
 			"processing": "잠시만 기다려 주세요...",
-			"next": "다음",
-			"previous": "이전"
+			"paginate": {
+				"previous": "이전",
+				"next": "다음"
+			}
 		},
 	
 		pageLength: 100,
@@ -547,4 +546,26 @@ function deleteReply(rNo) {
 
     });
 }
+
+// 첨부파일 삭제
+function deleteFile(fNo) {
+	
+	$.ajax({
+        type: "PUT",
+        url: "/board/deleteFile/" + fNo,
+        success:function(args){   
+        	
+        	alert("삭제되었습니다.");
+        	location.href = "/board/detail/" + $("#no").val();   
+        	
+        }, 
+        error:function(e){  
+            alert(e.responseText);  
+        } 
+
+    });
+	
+}
+
+
 

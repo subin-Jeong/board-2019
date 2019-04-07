@@ -28,6 +28,9 @@ public class File {
     
     @Column(name = "REG_DATE")
     private Date regDate;
+    
+    @Column(name = "DEL_FLAG")
+    private String delFlag;
 
 	public int getNo() {
 		return no;
@@ -69,11 +72,21 @@ public class File {
 		this.regDate = regDate;
 	}
 
+	public String getDelFlag() {
+		return delFlag;
+	}
+
+	public void setDelFlag(String delFlag) {
+		this.delFlag = delFlag;
+	}
+
 	@Override
 	public String toString() {
 		return "File [no=" + no + ", filename=" + filename + ", url=" + url + ", boardNo=" + boardNo + ", regDate="
-				+ regDate + "]";
+				+ regDate + ", delFlag=" + delFlag + "]";
 	}
+
+    
 
     
 }

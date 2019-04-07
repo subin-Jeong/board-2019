@@ -27,10 +27,11 @@ public class ReplyController {
 	@Autowired
 	private ReplyRepository replyRepository;
 	
-	//───────────────────────────────────────
-	// 리스트 조회
-	//───────────────────────────────────────
-	
+	/**
+	 * 전체 댓글 불러오기
+	 * @param bNo
+	 * @return 전체 댓글 List
+	 */
 	@PostMapping("/getList/{bNo}")
 	@ResponseBody 
 	public List<Reply> getList(@PathVariable int bNo) {
@@ -38,10 +39,11 @@ public class ReplyController {
 		return replyRepository.findAllByBoardNoOrdering(bNo); 
 	}
 	
-	//───────────────────────────────────────
-	// 등록
-	//───────────────────────────────────────
-	
+	/**
+	 * 댓글 등록
+	 * @param reply
+	 * @return 등록된 댓글 Entity
+	 */
 	@PostMapping("/save")
 	@ResponseBody 
 	public Reply save(@RequestBody Reply reply) {
@@ -58,9 +60,11 @@ public class ReplyController {
 		return replyRepository.save(saveReply);
 	}
 	
-	//───────────────────────────────────────
-	// 답글 등록
-	//───────────────────────────────────────
+	/**
+	 * 대댓글 등록
+	 * @param reply
+	 * @return 등록된 대댓글 Entity
+	 */
 	@PostMapping("/saveReply")
 	@ResponseBody 
 	public Reply saveReply(@RequestBody Reply reply) {
@@ -138,9 +142,11 @@ public class ReplyController {
 		return replyRepository.save(reply);
 	}
 	
-	//───────────────────────────────────────
-	// 수정
-	//───────────────────────────────────────
+	/**
+	 * 댓글 수정
+	 * @param rNo
+	 * @return 수정된 댓글 Entity
+	 */
 	@PostMapping("/getReply/{rNo}")
 	@ResponseBody
 	public Reply getReply(@PathVariable int rNo) {
@@ -154,17 +160,20 @@ public class ReplyController {
 		Reply updateReply = replyRepository.findOne(rNo);
 		
 		// 수정 시 내용 이외 기존 사항 반영
+		updateReply.setNo(rNo);
 		updateReply.setContent(reply.getContent());
 		
 		// 수정일자를 오늘로 지정
 		updateReply.setModifyDate(new Date());
 		
-		return replyRepository.save(reply);
+		return replyRepository.save(updateReply);
 	}
 	
-	//───────────────────────────────────────
-	// 삭제
-	//───────────────────────────────────────
+	/**
+	 * 댓글 삭제
+	 * @param rNo
+	 * @return 리다이렉트 될 뷰 페이지
+	 */
 	@PutMapping("/delete/{rNo}")
 	@ResponseBody
 	public String delete(@PathVariable int rNo) {

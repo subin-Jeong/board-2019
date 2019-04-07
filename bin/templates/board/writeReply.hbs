@@ -1,19 +1,86 @@
-
-  <div class="table-responsive card shadow mb-4">
-    <table class="table table-bordered display hover" id="boardList" width="100%" cellspacing="0">
-      <thead>
-        <tr>
-          <th width="10%" align="center">11</th>
-          <th width="40%">22</th>
-          <th align="center">33</th>
-          <th align="center">depth</th>
-          <th align="center">GroupNo</th>
-          <th align="center">GroupSeq</th>
-        </tr>
-      </thead>
-      <tbody id="list">
-      </tbody>
-    </table>
-
-  </div>
-
+<div class="card shadow mb-4" style="width:80%; margin:auto;">
+	<a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="collapseCardExample">
+	<table width="100%">
+	<tr>
+		<td width="10%">
+			<h6 class="m-0 font-weight-bold text-primary">&nbsp;&nbsp;&nbsp;댓글</h6>
+		</td>
+		<td width="80%">
+			<textarea class="form-control" id="contents" placeholder="내용을 입력하세요" style="width:98%; height:100px; resize:none;"></textarea>
+		</td>
+		<td>
+			<a href="#" class="btn btn-primary btn-icon-split" id="btn-reply-save">
+			<span class="text" style="height:95px; line-height:88px;">등록</span>
+			</a>
+		</td>
+	</tr>
+	</table>
+	</a>
+	<div class="collapse show" id="collapseCardExample" style="">
+		<div class="card-body">
+			<table id="replyList" width="100%" cellspacing="2" cellpadding="2" align="center">
+			<colgroup>
+			<col width="45%">
+			<col width="20%">
+			<col width="10%">
+			<col width="25%">
+			</colgroup>
+			</table>
+		</div>
+		<!-- 댓글의 답글 -->
+		<input type="hidden" name="reply_no" id="reply_no" value=""/>
+		<!-- 댓글의 답글작성 Modal -->
+		<div class="modal fade" id="replyModal">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						 답글작성 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<table width="100%">
+						<tr>
+							<td width="85%">
+								<textarea class="form-control" id="reply_contents" placeholder="내용을 입력하세요" style="width:98%; height:100px; resize:none;"></textarea>
+							</td>
+							<td width="15%">
+								<a href="#" class="btn btn-primary btn-icon-split" id="btn-reply-reply-save">
+								<span class="text" style="height:95px; line-height:88px;">등록</span>
+								</a>
+							</td>
+						</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 댓글의 답글작성 Modal -->
+		<!-- 댓글 수정 Modal -->
+		<div class="modal fade" id="replyModifyModal">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						 댓글 수정 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<table width="100%">
+						<tr>
+							<td width="85%">
+								<textarea class="form-control" id="reply_contents" style="width:98%; height:100px; resize:none;"></textarea>
+							</td>
+							<td width="15%">
+								<a href="#" class="btn btn-warning btn-icon-split" id="btn-reply-mod">
+								<span class="text" style="height:95px; line-height:88px;">수정</span>
+								</a>
+							</td>
+						</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

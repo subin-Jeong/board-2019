@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.estsoft.domain.Board;
+import com.estsoft.domain.Reply;
 import com.estsoft.repository.BoardRepository;
 
 @Controller
@@ -26,29 +27,39 @@ public class BoardController {
 	@Autowired
 	private BoardRepository boardRepository;
 	
-	//───────────────────────────────────────
-	// 리스트 조회
-	//───────────────────────────────────────
+	/**
+	 * 전체 게시글 목록
+	 * @return 리다이렉트 될 뷰 페이지
+	 */
 	@GetMapping("/list")
 	public String list() {
 		return "/board/list";
 	}
 	
+	/**
+	 * 전체 게시글 목록 불러오기
+	 * @return 전체 게시글 목록 List
+	 */
 	@PostMapping("/getList")
 	@ResponseBody 
 	public List<Board> getList() {
-	
 		return boardRepository.findAllOrdering(); 
 	}
 	
-	//───────────────────────────────────────
-	// 등록
-	//───────────────────────────────────────
+	/**
+	 * 게시글 등록 페이지
+	 * @return 리다이렉트 될 뷰 페이지
+	 */
 	@GetMapping("/write")
 	public String write() {
 		return "/board/write";
 	}
 	
+	/**
+	 * 게시글 등록
+	 * @param board
+	 * @return 등록된 게시글 Entity
+	 */
 	@PostMapping("/save")
 	@ResponseBody 
 	public Board save(@RequestBody Board board) {
@@ -65,9 +76,12 @@ public class BoardController {
 		return boardRepository.save(saveBoard);
 	}
 	
-	//───────────────────────────────────────
-	// 상세
-	//───────────────────────────────────────
+	/**
+	 * 게시글 상세 페이지
+	 * @param bNo
+	 * @param model
+	 * @return 리다이렉트 될 뷰 페이지
+	 */
 	@GetMapping("/detail/{bNo}")
 	public String detail(@PathVariable int bNo, Model model) {
 		
@@ -78,15 +92,23 @@ public class BoardController {
 		return "/board/detail";
 	}
 	
+	/**
+	 * 게시글 상세 불러오기
+	 * @param bNo
+	 * @return 게시글 상세 Entity
+	 */
 	@PostMapping("/getBoard/{bNo}")
 	@ResponseBody
 	public Board getBoard(@PathVariable int bNo) {
 		return boardRepository.findOne(bNo);
 	}
 	
-	//───────────────────────────────────────
-	// 수정
-	//───────────────────────────────────────
+	/**
+	 * 게시글 수정 페이지  
+	 * @param bNo
+	 * @param model
+	 * @return 리다이렉트 될 뷰 페이지
+	 */
 	@GetMapping("/modify/{bNo}")
 	public String modify(@PathVariable int bNo, Model model) {
 		
@@ -95,26 +117,34 @@ public class BoardController {
 		return "/board/modify";
 	}
 	
+	/**
+	 * 게시글 수정
+	 * @param bNo
+	 * @param board
+	 * @return 수정된 게시글 Entity
+	 */
 	@PutMapping("/update/{bNo}")
 	@ResponseBody
 	public Board update(@PathVariable int bNo, @RequestBody Board board) {
 		
 		Board updateBoard = boardRepository.findOne(bNo);
-		board.setNo(bNo);
 		
-		// 수정 시 기존 사항 반영
-		board.setGroupNo(updateBoard.getGroupNo());
-		board.setGroupSeq(updateBoard.getGroupSeq());
+		// 수정 시 제목, 내용 이외 기존 사항 반영
+		updateBoard.setNo(bNo);
+		updateBoard.setTitle(board.getTitle());
+		updateBoard.setContent(board.getContent());
 		
 		// 수정일자를 오늘로 지정
-		board.setModifyDate(new Date());
+		updateBoard.setModifyDate(new Date());
 		
-		return boardRepository.save(board);
+		return boardRepository.save(updateBoard);
 	}
 	
-	//───────────────────────────────────────
-	// 삭제
-	//───────────────────────────────────────
+	/**
+	 * 게시글 삭제
+	 * @param bNo
+	 * @return 리다이렉트 될 뷰 페이지
+	 */
 	@PutMapping("/delete/{bNo}")
 	@ResponseBody
 	public String delete(@PathVariable int bNo) {
@@ -128,9 +158,12 @@ public class BoardController {
 		return "/board/list";
 	}	
 	
-	//───────────────────────────────────────
-	// 답글 등록
-	//───────────────────────────────────────
+	/**
+	 * 답글 등록 페이지
+	 * @param bNo
+	 * @param model
+	 * @return 리다이렉트 될 뷰 페이지
+	 */
 	@GetMapping("/write/{bNo}")
 	public String writeReply(@PathVariable int bNo, Model model) {
 		
@@ -144,6 +177,11 @@ public class BoardController {
 		return "/board/reply";
 	}
 	
+	/**
+	 * 답글 등록
+	 * @param board
+	 * @return 등록된 답글 Entity
+	 */
 	@PostMapping("/saveReply")
 	@ResponseBody 
 	public Board saveReply(@RequestBody Board board) {
