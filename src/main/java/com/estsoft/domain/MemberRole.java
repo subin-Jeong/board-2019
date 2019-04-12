@@ -1,42 +1,57 @@
 package com.estsoft.domain;
 
-import javax.persistence.Column;
+import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-@Entity(name = "MEMBER_ROLE")
+@Entity
+@Table(name="MEMBER_ROLE", uniqueConstraints = @UniqueConstraint(columnNames = {"MEMBER_ID", "ROLE_ID"}, name="MEMBER_ROLE_UNIQUE_MEMBER_ID_AND_ROLE_ID"))
 public class MemberRole {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ROLE_NO")
-	private Long roleNo;
+	@Column(name = "ID", columnDefinition = "bigint unsigned")
+	private Integer id;
 	
-	@Column(name = "ROLE_NAME")
-	private String roleName;
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "MEMBER_ID", foreignKey = @ForeignKey(name = "FK_MEMBER_ROLE_MEMBER_ID"))
+	private Member member;
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "ROLE_ID", foreignKey = @ForeignKey(name = "FK_MEMBER_ROLE_ROLE_ID"))
+	private Role role;
 
-	public Long getRoleNo() {
-		return roleNo;
+	public Integer getId() {
+		return id;
 	}
 
-	public void setRoleNo(Long roleNo) {
-		this.roleNo = roleNo;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
-	public String getRoleName() {
-		return roleName;
+	public Member getMember() {
+		return member;
 	}
 
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
+	public void setMember(Member member) {
+		this.member = member;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
 	}
 
 	@Override
 	public String toString() {
-		return "MemberRole [roleNo=" + roleNo + ", roleName=" + roleName + "]";
+		return "MemberRole [id=" + id + ", member=" + member + ", role=" + role + "]";
 	}
+	
 	
 	
 }

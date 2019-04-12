@@ -33,12 +33,16 @@ public class FileController {
 	@Autowired
 	private FileRepository fileRepository;
 	
+	// ¾÷·Îµå °æ·Î
 	static final String uploadDir = "./src/main/resources/static/upload/";
 	
+	// ¾÷·Îµå °³¼ö Á¦ÇÑ
+	static final int UPLOAD_LIMIT = 5;
+	
 	/**
-	 * ì „ì²´ ì²¨ë¶€íŒŒì¼ ë¦¬ìŠ¤íŠ¸ ë¶ˆëŸ¬ì˜¤ê¸°
+	 * ÀüÃ¼ Ã·ºÎÆÄÀÏ ¸®½ºÆ® ºÒ·¯¿À±â
 	 * @param bNo
-	 * @return ì „ì²´ ì²¨ë¶€íŒŒì¼ List
+	 * @return ÀüÃ¼ Ã·ºÎÆÄÀÏ List
 	 */
 	@PostMapping("/getFile/{bNo}")
 	@ResponseBody 
@@ -47,7 +51,7 @@ public class FileController {
 	}
 	
 	/**
-	 * ì—…ë¡œë“œí•œ ì²¨ë¶€íŒŒì¼ ì €ì¥
+	 * ¾÷·ÎµåÇÑ Ã·ºÎÆÄÀÏ ÀúÀå
 	 * @param file
 	 * @return Response Entity
 	 * @throws IOException
@@ -61,47 +65,47 @@ public class FileController {
 	
 	
 	/**
-	 * ì—…ë¡œë“œ ì²¨ë¶€íŒŒì¼ ë“±ë¡ 
+	 * ¾÷·Îµå Ã·ºÎÆÄÀÏ µî·Ï 
 	 * @param uploadData
-	 * @return ì—…ë¡œë“œ ê²°ê³¼
+	 * @return ¾÷·Îµå °á°ú
 	 */
 	@PostMapping("/upload")
 	@ResponseBody 
 	public String upload(@RequestBody Map<String, String> uploadData) {
 		
-		// ì—°ê´€ ê¸€ë²ˆí˜¸
+		// ¿¬°ü ±Û¹øÈ£
 		int boardNo = Integer.parseInt(uploadData.get("boardNo"));
 		
-		// ë“±ë¡ì‹œê°„
+		// °á°ú°ª ¹İÈ¯À» À§ÇÑ JSON Object
+		JSONObject resultObj = new JSONObject();
+		
+		// µî·Ï½Ã°£
 		Date date = new Date();
 		
-		// ì²¨ë¶€íŒŒì¼ ë¦¬ìŠ¤íŠ¸
+		// Ã·ºÎÆÄÀÏ ¸®½ºÆ®
 		Iterator<String> iterator = uploadData.keySet().iterator();
 		
-		// ê²°ê³¼ê°’ ë°˜í™˜ì„ ìœ„í•œ JSON Object
-		JSONObject resultObj = new JSONObject();
-
         while(iterator.hasNext()) {
         	
         	String key = iterator.next();
         	
-        	// ë¶™ì—¬ë„£ê¸° í•œ ì²¨ë¶€íŒŒì¼
+        	// ºÙ¿©³Ö±â ÇÑ Ã·ºÎÆÄÀÏ
             if(key.indexOf("url") != -1) {
             	
             	File file = new File();
             	
-            	// ë‹¤ìš´ë¡œë“œ ê²½ë¡œ
+            	// ´Ù¿î·Îµå °æ·Î
             	String fileURL = uploadData.get(key);
             	
-            	// íŒŒì¼ëª…
+            	// ÆÄÀÏ¸í
             	String filename = "img_" + System.currentTimeMillis() + "_" + boardNo; 
             	
-            	// í™•ì¥ì
+            	// È®ÀåÀÚ
             	String extension = "png";
             	
-            	// ì§€ì •ëœ í™•ì¥ìê°€ ìˆìœ¼ë©´ í•´ë‹¹ í™•ì¥ìë¡œ ë³€ê²½
+            	// ÁöÁ¤µÈ È®ÀåÀÚ°¡ ÀÖÀ¸¸é ÇØ´ç È®ÀåÀÚ·Î º¯°æ
             	if(fileURL.substring(fileURL.lastIndexOf("/")+1, fileURL.length()).contains(".")) {
-            		// URLì— í¬í•¨ëœ íŒŒë¼ë¯¸í„° ì‚­ì œ
+            		// URL¿¡ Æ÷ÇÔµÈ ÆÄ¶ó¹ÌÅÍ »èÁ¦
             		int checkURL = fileURL.indexOf("?", fileURL.lastIndexOf(".")+1);
             		if(checkURL == -1) {
             			extension = fileURL.substring(fileURL.lastIndexOf(".")+1, fileURL.length());
@@ -120,9 +124,20 @@ public class FileController {
             	file.setDelFlag("N");
             	
             	try {
-            		fileRepository.save(file);
-					resultObj.put("result", HttpStatus.OK);
-				} catch (JSONException e) {
+            		
+            		// Ã·ºÎÆÄÀÏ °³¼ö Á¦ÇÑ È®ÀÎ
+            		if(checkFileCount(boardNo)) {
+            			
+            			fileRepository.save(file);
+                		resultObj.put("result", HttpStatus.OK);
+            			
+            		} else {
+            		
+            			return resultObj.put("result", "OVER").toString();
+            		}
+            		
+				
+            	} catch (JSONException e) {
 					e.printStackTrace();
 				}
             }
@@ -131,13 +146,13 @@ public class FileController {
             	
             	File file = new File();
             	
-            	// íŒŒì¼ëª…
+            	// ÆÄÀÏ¸í
             	String filename = uploadData.get(key); 
             	
-            	// í™•ì¥ì
+            	// È®ÀåÀÚ
             	String extension = "";
             	
-            	// ì§€ì •ëœ í™•ì¥ìê°€ ìˆìœ¼ë©´ í•´ë‹¹ í™•ì¥ìë¡œ ë³€ê²½
+            	// ÁöÁ¤µÈ È®ÀåÀÚ°¡ ÀÖÀ¸¸é ÇØ´ç È®ÀåÀÚ·Î º¯°æ
             	if(filename.substring(filename.lastIndexOf("/")+1, filename.length()).contains(".")) {
             		extension = filename.substring(filename.lastIndexOf(".")+1, filename.length());
             	} 
@@ -148,8 +163,18 @@ public class FileController {
             	file.setDelFlag("N");
             	
             	try {
-            		fileRepository.save(file);
-            		resultObj.put("result", HttpStatus.OK);
+            		
+            		// Ã·ºÎÆÄÀÏ °³¼ö Á¦ÇÑ È®ÀÎ
+            		if(checkFileCount(boardNo)) {
+            			
+            			fileRepository.save(file);
+                		resultObj.put("result", HttpStatus.OK);
+            			
+            		} else {
+            		
+            			return resultObj.put("result", "OVER").toString();
+            		}
+            		
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
@@ -161,15 +186,15 @@ public class FileController {
 	
 	
 	/**
-	 * ì²¨ë¶€íŒŒì¼ ì‚­ì œ
+	 * Ã·ºÎÆÄÀÏ »èÁ¦
 	 * @param fNo
-	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
+	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
 	 */
 	@PutMapping("/deleteFile/{fNo}")
 	@ResponseBody
 	public String delete(@PathVariable int fNo) {
 		
-		// ê¸°ì¡´ ë°ì´í„°ëŠ” ìœ ì§€í•˜ë˜, delFlag = 'Y' ì—…ë°ì´íŠ¸
+		// ±âÁ¸ µ¥ÀÌÅÍ´Â À¯ÁöÇÏµÇ, delFlag = 'Y' ¾÷µ¥ÀÌÆ®
 		File file = fileRepository.findOne(fNo);
 		
 		file.setDelFlag("Y");
@@ -178,7 +203,26 @@ public class FileController {
 		return "/board/detail/" + file.getBoardNo();
 	}	
 	
+	
+	/**
+	 * Ã·ºÎÆÄÀÏ ¾÷·Îµå °³¼ö Á¦ÇÑ
+	 * @param boardNo
+	 * @return true / false
+	 */
+	private boolean checkFileCount(int boardNo) {
 		
+		// Ã·ºÎÆÄÀÏ °³¼ö Á¦ÇÑ
+		int fileCnt = fileRepository.countByBoardNo(boardNo);
+		
+		System.out.println("ÆÄÀÏ°³¼ö" + fileCnt);
+		
+		if(fileCnt < UPLOAD_LIMIT) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
 	
 	
 

@@ -1,9 +1,12 @@
 package com.estsoft.web;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -16,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.estsoft.domain.Board;
-import com.estsoft.domain.Reply;
 import com.estsoft.repository.BoardRepository;
 
 @Controller
@@ -40,10 +42,11 @@ public class BoardController {
 	 * 전체 게시글 목록 불러오기
 	 * @return 전체 게시글 목록 List
 	 */
-	@PostMapping("/getList")
+	@PostMapping("/getList/{pageNum}")
 	@ResponseBody 
-	public List<Board> getList() {
-		return boardRepository.findAllOrdering(); 
+	public Page<Board> getList(@PageableDefault(size = 100) Pageable pageable, @PathVariable int pageNum) {
+		PageRequest pageRequest = new PageRequest(pageNum - 1, pageable.getPageSize());	
+		return boardRepository.findAllOrdering(pageRequest);
 	}
 	
 	/**

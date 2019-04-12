@@ -18,13 +18,26 @@
 	</a>
 	<div class="collapse show" id="collapseCardExample" style="">
 		<div class="card-body">
-			<table id="replyList" width="100%" cellspacing="2" cellpadding="2" align="center">
+			<input type="hidden" name="pageNum" id="pageNum" value="0">
+			<table width="100%" cellspacing="2" cellpadding="2" align="center">
 			<colgroup>
 			<col width="45%">
 			<col width="20%">
 			<col width="10%">
 			<col width="25%">
 			</colgroup>
+			<tbody id="replyList">
+			</tbody>
+			</table>
+			<table width="100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td id="replyListPaginationInfo">
+				</td>
+				<td>
+					<div id="replyListPagination" style="float:right">
+					</div>
+				</td>
+			</tr>
 			</table>
 		</div>
 		<!-- 댓글의 답글 -->

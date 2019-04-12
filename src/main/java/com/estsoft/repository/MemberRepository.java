@@ -8,6 +8,10 @@ import com.estsoft.domain.Member;
 @RepositoryRestResource
 public interface MemberRepository extends CrudRepository<Member, Long> {
 	
+	// findByEmail
 	public Member findByEmail(String email);
+	
+	// countByEmailIgnoreCase
+	public int countByEmailIgnoreCase(String email);
 
 }

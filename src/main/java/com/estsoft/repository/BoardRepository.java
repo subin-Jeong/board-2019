@@ -1,7 +1,7 @@
 package com.estsoft.repository;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +14,14 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 	
 	// 삭제되지 않은 데이터만 사용
 	String delCheck = "b.delFlag='N'";
+	
+	// findAllOrdering
+	@Query("SELECT b FROM BOARD b WHERE " + delCheck + " ORDER BY b.groupNo DESC, b.groupSeq ASC, b.depth ASC")
+	Page<Board> findAllOrdering(Pageable page);
+	
+	// findOne
+	@Query("SELECT b FROM BOARD b WHERE " + delCheck +" AND b.no = :bNo")
+	Board findOne(@Param("bNo") int bNo);
 	
 	// findGroupNoBybNo
 	@Query("SELECT groupNo FROM BOARD b WHERE " + delCheck +" AND b.no = :bNo")
@@ -30,10 +38,6 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 	// findGroupSeqByGroupNoAndGroupSeq
 	@Query("SELECT COALESCE(MAX(groupSeq), 0) FROM BOARD b WHERE " + delCheck + " AND b.groupNo = :groupNo AND b.groupSeq < :groupSeq")
 	double findGroupSeqByGroupNoAndGroupSeq(@Param("groupNo") int groupNo, @Param("groupSeq") double groupSeq);
-	
-	// findAllOrdering
-	@Query("SELECT b FROM BOARD b WHERE " + delCheck + " ORDER BY b.groupNo DESC, b.groupSeq ASC, b.depth ASC")
-	List<Board> findAllOrdering();
 	
 	// findMinGroupSeqByParentNoAndGroupNo
 	@Query("SELECT	COALESCE(MIN(groupSeq), 0) "

@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.estsoft.domain.File;
-import com.estsoft.domain.Reply;
 
 public interface FileRepository extends JpaRepository<File, Integer> {
 
@@ -17,5 +16,9 @@ public interface FileRepository extends JpaRepository<File, Integer> {
 	// findAllByBoardNoOrdering
 	@Query("SELECT f FROM FILE f WHERE " + delCheck + " AND f.boardNo = :boardNo ORDER BY f.regDate DESC")
 	List<File> findAllByBoardNoOrdering(@Param("boardNo") int boardNo);
+	
+	// countByBoardNo
+	@Query("SELECT COUNT(no) FROM FILE f WHERE " + delCheck + " AND f.boardNo = :boardNo")
+	int countByBoardNo(@Param("boardNo") int boardNo);
 
 } 

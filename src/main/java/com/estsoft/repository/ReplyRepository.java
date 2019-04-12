@@ -2,6 +2,8 @@ package com.estsoft.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +19,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Integer> {
 		
 	// findAllOrdering
 	@Query("SELECT r FROM REPLY r WHERE " + delCheck + " AND r.boardNo = :boardNo ORDER BY r.groupNo DESC, r.groupSeq ASC, r.depth ASC")
-	List<Reply> findAllByBoardNoOrdering(@Param("boardNo") int boardNo);	
+	Page<Reply> findAllByBoardNoOrdering(@Param("boardNo") int boardNo, Pageable page);	
 	
 	// findGroupNoByrNo
 	@Query("SELECT groupNo FROM REPLY r WHERE " + delCheck +" AND r.no = :rNo")

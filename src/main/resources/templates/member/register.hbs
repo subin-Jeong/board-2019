@@ -17,25 +17,27 @@
 				</div>
 				<div class="form-group">
 					<input type="email" class="form-control form-control-user" id="email" placeholder="Email">
+					<div id="emailCheck" class="font-size-small font-bold" style="margin-top:10px; padding-left:15px;"></div>
 				</div>
-				<div class="form-group row">
-					<div class="col-sm-6 mb-3 mb-sm-0">
-						<input type="password" class="form-control form-control-user" id="password" placeholder="비밀번호">
-					</div>
-					<div class="col-sm-6">
-						<input type="password" class="form-control form-control-user" id="passwordCheck" placeholder="비밀번호 확인">
-					</div>
+				<div class="form-group">
+					<input type="password" class="form-control form-control-user" id="password" placeholder="비밀번호">
 				</div>
+				<div class="form-group">
+					<input type="password" class="form-control form-control-user" id="passwordCheck" placeholder="비밀번호 확인">
+					<div id="pwdCheck" class="font-size-small font-bold" style="margin-top:10px; padding-left:15px;"></div>
+				</div>
+				<a href="#" class="btn btn-warning btn-user btn-block" id="btn-email-check" style="display:none">
+				이메일 중복확인 
+				</a>
 				<a href="#" class="btn btn-primary btn-user btn-block" id="btn-register">
 				가입하기 
 				</a>
+				<input type="hidden" id="registerCheck" value="N">
+				<input type="hidden" id="emailUniqueCheck" value="N">
 			</form>
 			<hr>
 			<div class="text-center">
-				<a class="small" href="forgot-password.html">Forgot Password?</a>
-			</div>
-			<div class="text-center">
-				<a class="small" href="login.html">Already have an account? Login!</a>
+				<a class="small" href="/member/login">Already have an account? Login!</a>
 			</div>
 		</div>
 	</div>

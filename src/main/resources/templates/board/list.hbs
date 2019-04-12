@@ -1,4 +1,4 @@
- {{> board/include/top}}
+{{> board/include/top}}
 <body id="page-top">
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -21,26 +21,36 @@
 						</h6>
 					</div>
 					<div class="card-body">
-						<div>
-							<table class="table table-bordered hover" id="boardList" width="100%" cellspacing="0">
-							<thead>
-							<tr>
-								<th width="10%">
-									 번호
-								</th>
-								<th width="55%">
-									 제목
-								</th>
-								<th width="15%">
-									 등록일자
-								</th>
-								<th width="10%">
-									 작성자
-								</th>
-							</tr>
-							</thead>
-							</table>
-						</div>
+						<input type="hidden" name="pageNum" id="pageNum" value="0">
+						<table class="table table-bordered hover" width="100%" cellspacing="0">
+						<thead>
+						<tr>
+							<th width="10%">
+								 번호
+							</th>
+							<th width="55%">
+								 제목
+							</th>
+							<th width="15%">
+								 등록일자
+							</th>
+							<th width="10%">
+								 작성자
+							</th>
+						</tr>
+						</thead>
+						<tbody id="boardList"></tbody>
+						</table>
+						<table width="100%" cellspacing="0" cellpadding="0">
+						<tr>
+							<td id="boardListPaginationInfo" style="vertical-align:top">
+							</td>
+							<td>
+								<div id="boardListPagination" style="float:right">
+								</div>
+							</td>
+						</tr>
+						</table>
 					</div>
 				</div>
 			</div>
@@ -52,6 +62,5 @@
 	<!-- End of Content Wrapper -->
 </div>
 <!-- End of Page Wrapper -->
- {{> board/include/scroll}} 
-
+ {{> board/include/scroll}}
 </body>

@@ -14,23 +14,29 @@ $(document).ready(function() {
 	
 	// 이미지 Drag & Drop
 	$(".fileDrop").on("dragenter dragover", function(event) {
+		
 		// 기본 효과 방지
 		event.preventDefault();
+		
 	});
 	
 	$(".fileDrop").on("drop", function(event) {
+		
 		// 기본 효과 방지
 		event.preventDefault();
 		
 		// 드래그된 파일 정보
 		var files = event.originalEvent.dataTransfer.files;
+		
 		// 첫번째 파일
 		var file = files[0];
+		
 		// 콘솔에서 파일정보 확인
 		console.log(file);
 		
 		// ajax로 전달할 폼 객체
 		var formData = new FormData();
+		
 		// 폼 객체에 파일 추가
 		formData.append("file", file);
 		
@@ -54,7 +60,6 @@ $(document).ready(function() {
 				$(".uploadedList").append(originFileName + "<br />");
 				$(".uploadedList").append(uploadFileInput);
 				
-
 			}
 			
 		});
@@ -95,7 +100,16 @@ function saveFile(bNo) {
 	        contentType: "application/json; charset=utf-8",
 	        data: JSON.stringify(uploadData),
 	        success:function(args){   
-	        	alert("첨부파일이 등록되었습니다.");
+	        	
+	        	if(args["result"] == "200") {
+	        		
+	        		alert("첨부파일이 등록되었습니다.");
+	        		
+	        	} else if(args["result"] == "OVER") {
+	        		
+	        		alert("첨부파일을 5개 이상 등록하실 수 없습니다.");
+	        	}
+	        	
 	        }, 
 	        error:function(e){  
 	            alert("첨부파일 등록에 실패했습니다.");  
