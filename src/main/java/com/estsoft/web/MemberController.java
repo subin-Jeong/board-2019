@@ -1,107 +1,131 @@
 package com.estsoft.web;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.Date;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.estsoft.domain.Member;
-import com.estsoft.repository.MemberRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.estsoft.domain.api.Member;
+import com.estsoft.domain.oauth.OAuthClientDetails;
+import com.estsoft.repository.api.MemberRepository;
+import com.estsoft.repository.oauth.OAuthClientRepository;
+import com.estsoft.service.ClientTokenService;
 
 @Controller
 @RequestMapping("/member")
+@Transactional
+@PropertySource("classpath:/application.properties")
 public class MemberController {
 
 	@Autowired
 	private MemberRepository memberRepository;
 	
-	@Value("${security.oauth2.client.client-id}")
-	private String clientId;
+	@Autowired
+	private OAuthClientRepository oAuthClientRepository;
 	
-	@Value("${security.oauth2.client.client-secret}")
-	private String clientSecret;
+	@Autowired
+	private ClientTokenService clientTokenService;
 	
-	
-	@GetMapping("/test")
-	public String test() {
-		return "Hello";
-	}
-	
+	@Autowired
+	private Environment environment;
 	
 	/**
-	 * È¸¿ø°¡ÀÔ ÆäÀÌÁö
-	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
+	 * íšŒì›ê°€ì… í˜ì´ì§€
+	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
 	 */
 	@GetMapping("/register")
 	public String register() {
 		return "member/register";
 	}
 	
+	
 	/**
-	 * ·Î±×ÀÎ ÆäÀÌÁö
-	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
+	 * ë¡œê·¸ì¸ í˜ì´ì§€
+	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
 	 */
 	@GetMapping("/login")
-	public String login() {
+	public String login(@RequestParam(value = "error", required = false) String errorType, Model model) {
+		
+		// ë¡œê·¸ì¸ ì—ëŸ¬ ì‹œ
+		if(errorType != null) {
+			switch(errorType) {
+				
+				// ë¡œê·¸ì¸ ì‹¤íŒ¨
+				case "1" : 
+					model.addAttribute("errorMsg", environment.getProperty("security.error.message.type1"));
+					break;
+					
+				// í† í° ì¸ì¦ ì‹¤íŒ¨
+				case "2" :
+					model.addAttribute("errorMsg", environment.getProperty("security.error.message.type2"));
+					break;
+					
+				// í† í° ë§Œë£Œ	
+				case "3" :
+					model.addAttribute("alertMsg", environment.getProperty("security.error.message.type3"));
+					break;
+					
+				// ë¡œê·¸ì¸ ì‹¤íŒ¨ ë©”ì‹œì§€ë¡œ ë°˜í™˜	
+				default : model.addAttribute("errorMsg", environment.getProperty("security.error.message.type1"));
+			
+			}
+		}
+		
 		return "member/login";
 	}
 	
 	/**
-	 * È¸¿ø°¡ÀÔ
+	 * íšŒì›ê°€ì…
 	 * @param member
-	 * @return µî·ÏµÈ Member Entity
+	 * @return ë“±ë¡ëœ Member Entity
 	 */
 	@PostMapping("/register")
 	@ResponseBody
 	public Member register(@RequestBody Member member) {
+		
 		member.setPassword(new BCryptPasswordEncoder().encode(member.getPassword()));
-		return memberRepository.save(member);
+		
+		// OAuth2 Server Client ë“±ë¡
+		OAuthClientDetails oauthClient = setOAuth2Client();
+		
+		if(oauthClient != null) {
+		
+			// íšŒì› í…Œì´ë¸”ì— ì—°ê´€ client_id ì €ì¥
+			member.setClientId(oauthClient.getClientId());
+			return memberRepository.save(member);
+			
+		} else {
+			
+			return new Member();
+		}
+		
 	}
 	
 	/**
-	 * ·Î±×ÀÎ
-	 * @param member
-	 * @return ·Î±×ÀÎÇÑ Member Entity
-	 */
-	@PostMapping("/login")
-	@ResponseBody
-	public Member login(@RequestBody Member member) {
-		return memberRepository.findByEmail(member.getEmail());
-	}
-	
-	/**
-	 * È¸¿ø ÀÎÁõÁ¤º¸ È®ÀÎ
-	 * @param auth
-	 * @return È¸¿ø ÀÎÁõ Á¤º¸
-	 */
-	@GetMapping("/getMember")
-	@ResponseBody
-	@PreAuthorize("#oauth2.hasAnyScope('read')")
-	public String getOAuth2Principal(OAuth2Authentication auth) {
-		return "Acess Granted For " + auth.getName();
-	}
-	
-	/**
-	 * È¸¿ø Á¤º¸ È®ÀÎ
+	 * íšŒì› ì •ë³´ í™•ì¸
 	 * @param email
-	 * @return ÀÌ¸ŞÀÏ·Î È®ÀÎµÈ È¸¿øÁ¤º¸
+	 * @return ì´ë©”ì¼ë¡œ í™•ì¸ëœ íšŒì›ì •ë³´
 	 */
 	@PostMapping("/getMember")
 	@ResponseBody
@@ -111,90 +135,149 @@ public class MemberController {
 		
 		if(email != null && email != "") {
 			
-			System.out.println("EMAIL : " + email);
-			System.out.println(memberRepository.countByEmailIgnoreCase(email));
 			return memberRepository.countByEmailIgnoreCase(email);
+		
 		} else {
+			
 			return 1;
+			
 		}
 		
 	}
 	
 	
 	/**
-	 * OAuth2 Server ¿¡¼­ JWT Token ¹Ş±â
-	 * @param user
-	 * @return ¹İÈ¯µÉ ÆäÀÌÁö
-	 * @throws JsonProcessingException 
+	 * ë¡œê·¸ì¸
+	 * @param member
+	 * @return ë¡œê·¸ì¸í•œ Member Entity
 	 */
-	@PostMapping("/authorize")
-	public String authoize(@RequestBody Member member) throws JsonProcessingException {
-		
-		System.out.println(member.toString());
-		
-		
-		Map<String, String> data = new HashMap<>();
-		
-		data.put("client_id", clientId);
-		data.put("client_secret", clientSecret);
-		data.put("response_type", "code");
-		data.put("username", member.getEmail());
-		data.put("password", member.getPassword());
-		data.put("grant_type", "password");
-		
-		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(data);
-		
-		String msg = sendREST("http://localhost:8080/oauth/token", json);
-		System.out.println("------------->" + msg);
-		return "/board/list";
+	@PostMapping("/login")
+	@ResponseBody
+	public Member login(@RequestBody Member member) {
+		return memberRepository.findByEmail(member.getEmail());
 	}
-	
 	
 	/**
-	 * REST API Àü¼Û (JSON POST REQUEST)
-	 * @param sendUrl
-	 * @param jsonValue
+	 * access_token ê°±ì‹  (refresh_token ì´ìš©)
+	 * @param principal
 	 * @return
-	 * @throws IllegalStateException
+	 * @throws JSONException 
+	 * @throws IOException 
 	 */
-	public static String sendREST(String sendUrl, String jsonValue) throws IllegalStateException {
+	@PostMapping("/refresh")
+	@ResponseBody
+	public String refresh(Principal principal, HttpServletRequest request, HttpServletResponse response) throws JSONException, IOException {
 		
-		String inputLine = null;
-		StringBuffer outResult = new StringBuffer();
-
-		try {
-			  
-			URL url = new URL(sendUrl);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setDoOutput(true);
-			conn.setRequestMethod("POST");
-			//conn.setRequestProperty("Content-Type", "application/json");
-			conn.setRequestProperty("Content-Type", "x-www-form-urlencoded");
-			conn.setRequestProperty("Accept-Charset", "UTF-8"); 
-			conn.setConnectTimeout(10000);
-			conn.setReadTimeout(10000);
-			  
-			OutputStream os = conn.getOutputStream();
-			os.write(jsonValue.getBytes("UTF-8"));
-			os.flush();
+		String email = principal.getName();
+		
+		if(email != null) {
 			
-			// ¸®ÅÏµÈ °á°ú ÀĞ±â
-			BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-			
-			while ((inputLine = in.readLine()) != null) {
-				outResult.append(inputLine);
+			JSONObject AUTH_INFO = clientTokenService.refreshOAuth2Token(email);
+			if(AUTH_INFO.getString("access_token") != null) {
+				
+				// Token ìœ íš¨
+				// ê¸°ì¡´ access_token ì¿ í‚¤ë¥¼ ë¹„ìœ íš¨ ì²˜ë¦¬ í›„, ìƒˆë¡œ ë¶€ì—¬
+				Cookie[] oldCookies = request.getCookies();
+				for(Cookie cookie : oldCookies) {
+					
+					if(cookie.getName().equals("access_token")) {
+						
+						Cookie removeCookie = new Cookie(cookie.getName(), null);
+						removeCookie.setPath("/");
+						removeCookie.setMaxAge(0);
+						response.addCookie(removeCookie);
+					}
+					
+				}
+				
+				// ìƒˆë¡œìš´ ì¿ í‚¤ ë°œê¸‰
+				Cookie addCookie = new Cookie("access_token", AUTH_INFO.getString("access_token"));
+				addCookie.setPath("/");
+				response.addCookie(addCookie);
+				
+				// ì¶”í›„ access_token ì¬ë°œê¸‰ì„ ìœ„í•´ refresh_token ì €ì¥
+				if(AUTH_INFO.has("refresh_token")) {
+					
+					String refreshToken = AUTH_INFO.getString("refresh_token");
+					memberRepository.updateRefreshTokenByEmail(email, refreshToken);
+				
+				}
+				
+				return HttpStatus.OK.toString();
 			}
 			
-			conn.disconnect();   
-			
-		} catch(Exception e) {
-			
-		      e.printStackTrace();
-		      
-		}	
-		  
-		return outResult.toString();
-	
+			return HttpStatus.BAD_REQUEST.toString();
+		}
+		
+		return HttpStatus.UNAUTHORIZED.toString();
 	}
+	
+	/**
+	 * ë¡œê·¸ì•„ì›ƒ
+	 * @param request
+	 * @param response
+	 * @return ë¡œê·¸ì¸ í˜ì´ì§€
+	 */
+	@GetMapping("/logout")
+	public String logout(HttpServletRequest request, HttpServletResponse response, Principal principal) {
+		
+		// refresh_token ì´ˆê¸°í™”
+		if(principal != null) {
+			
+			String email = principal.getName();
+			memberRepository.updateRefreshTokenByEmail(email, null);
+		
+		}
+		
+		// ë¡œê·¸ì¸ ì„¸ì…˜ ì¢…ë£Œ ë° í† í° ì‚­ì œ
+		request.getSession(false);
+		
+		Cookie[] cookies = request.getCookies();
+		for(Cookie cookie : cookies) {
+			
+			if(cookie.getName().equals("access_token")) {
+				
+				Cookie removeCookie = new Cookie(cookie.getName(), null);
+				removeCookie.setPath("/");
+				removeCookie.setMaxAge(0);
+				response.addCookie(removeCookie);
+			}
+			
+		}
+		
+		return "/member/login";
+	}
+	
+	/**
+	 * OAuth2 Server Client ë“±ë¡
+	 * @return OAuthClientDetails
+	 */
+	private OAuthClientDetails setOAuth2Client() {
+		
+		OAuthClientDetails oauthClient = new OAuthClientDetails();
+
+		// client_id : ìƒˆë¡œ ë°œê¸‰
+		int newId = oAuthClientRepository.findMaxId() + 1;
+		String clientId = "client_" + newId;
+		String clientPassword = new BCryptPasswordEncoder().encode(environment.getProperty("security.oauth2.client.client-secret"));
+		String scope = environment.getProperty("security.oauth2.client.scope");
+		String grantType = environment.getProperty("security.oauth2.client.grant-type");
+		int autoApprove = Integer.parseInt(environment.getProperty("security.oauth2.client.auto-approve-scopes"));
+		int accessTokenValidity = Integer.parseInt(environment.getProperty("security.oauth2.client.access-token-validity-seconds"));
+		int refreshTokenValidity = Integer.parseInt(environment.getProperty("security.oauth2.client.refresh-token-validity-seconds"));
+				
+		// ê¸°ë³¸ ì„¤ì •
+		oauthClient.setCreated(new Date());
+		oauthClient.setClientId(clientId);
+		oauthClient.setClientSecret(clientPassword);
+		oauthClient.setScope(scope);
+		oauthClient.setAuthorizedGrantTypes(grantType);
+		oauthClient.setAutoapprove(autoApprove);
+		oauthClient.setAccessTokenValidity(accessTokenValidity);
+		oauthClient.setRefreshTokenValidity(refreshTokenValidity);
+		
+		return oAuthClientRepository.save(oauthClient);
+		
+	}
+	
 }

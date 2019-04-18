@@ -189,27 +189,6 @@ public class FileUtils {
 		// 썸네일의 이름을 리턴함
 		return thumbnailName.substring(uploadPath.length()).replace(File.separatorChar, '/');
 	}
-	
-	/**
-	 * 아이콘 생성
-	 * @param uploadPath
-	 * @param path
-	 * @param fileName
-	 * @return 아이콘명
-	 * @throws Exception
-	 */
-	private static String makeIcon(String uploadPath, String path, String fileName) throws Exception {
-		
-		// 아이콘의 이름
-		String iconName = uploadPath + path + File.separator + fileName;
-		
-		// 아이콘 이름을 리턴
-		// File.separatorChar : 디렉토리 구분자
-		// 윈도우 \ , 유닉스(리눅스) /        
-		return iconName.substring(uploadPath.length()).replace(File.separatorChar, '/');
-	}
-	
-
 
 
 }

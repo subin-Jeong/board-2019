@@ -6,23 +6,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.estsoft.domain.File;
-import com.estsoft.repository.FileRepository;
+import com.estsoft.auth.SecurityConfig;
+import com.estsoft.domain.api.File;
+import com.estsoft.repository.api.FileRepository;
 import com.estsoft.util.FileUtils;
 
 @Controller
@@ -30,6 +31,9 @@ import com.estsoft.util.FileUtils;
 @Transactional
 public class FileController {
 
+	// Log
+	private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+		
 	@Autowired
 	private FileRepository fileRepository;
 	
@@ -73,11 +77,11 @@ public class FileController {
 	@ResponseBody 
 	public String upload(@RequestBody Map<String, String> uploadData) {
 		
+		// 파일 업로드 확인
+		String UPLOAD_STATUS = "N";
+		
 		// 연관 글번호
 		int boardNo = Integer.parseInt(uploadData.get("boardNo"));
-		
-		// 결과값 반환을 위한 JSON Object
-		JSONObject resultObj = new JSONObject();
 		
 		// 등록시간
 		Date date = new Date();
@@ -123,22 +127,15 @@ public class FileController {
             	file.setRegDate(date);
             	file.setDelFlag("N");
             	
-            	try {
-            		
-            		// 첨부파일 개수 제한 확인
-            		if(checkFileCount(boardNo)) {
-            			
-            			fileRepository.save(file);
-                		resultObj.put("result", HttpStatus.OK);
-            			
-            		} else {
-            		
-            			return resultObj.put("result", "OVER").toString();
-            		}
-            		
+            	// 첨부파일 개수 제한 확인
+				if(checkFileCount(boardNo)) {
+					
+					fileRepository.save(file);
+					UPLOAD_STATUS =  "Y";
+					
+				} else {
 				
-            	} catch (JSONException e) {
-					e.printStackTrace();
+					return "OVER";
 				}
             }
             
@@ -162,26 +159,20 @@ public class FileController {
             	file.setRegDate(date);
             	file.setDelFlag("N");
             	
-            	try {
-            		
-            		// 첨부파일 개수 제한 확인
-            		if(checkFileCount(boardNo)) {
-            			
-            			fileRepository.save(file);
-                		resultObj.put("result", HttpStatus.OK);
-            			
-            		} else {
-            		
-            			return resultObj.put("result", "OVER").toString();
-            		}
-            		
-				} catch (JSONException e) {
-					e.printStackTrace();
+            	// 첨부파일 개수 제한 확인
+				if(checkFileCount(boardNo)) {
+					
+					fileRepository.save(file);
+					UPLOAD_STATUS =  "Y";
+					
+				} else {
+				
+					return "OVER";
 				}
             }
         }
 		
-		return resultObj.toString();
+        return UPLOAD_STATUS;
 	}
 	
 	
@@ -190,7 +181,7 @@ public class FileController {
 	 * @param fNo
 	 * @return 리다이렉트 될 뷰 페이지
 	 */
-	@PutMapping("/deleteFile/{fNo}")
+	@DeleteMapping("/deleteFile/{fNo}")
 	@ResponseBody
 	public String delete(@PathVariable int fNo) {
 		
@@ -214,7 +205,7 @@ public class FileController {
 		// 첨부파일 개수 제한
 		int fileCnt = fileRepository.countByBoardNo(boardNo);
 		
-		System.out.println("파일개수" + fileCnt);
+		log.info("File Count : " + fileCnt);
 		
 		if(fileCnt < UPLOAD_LIMIT) {
 			return true;

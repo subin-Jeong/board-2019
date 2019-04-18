@@ -8,19 +8,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
+import com.estsoft.auth.SecurityConfig;
+import com.estsoft.domain.api.Member;
+import com.estsoft.repository.api.MemberRepository;
 
 
 /**
@@ -30,71 +39,213 @@ import org.springframework.stereotype.Service;
 @Component
 public class ClientTokenService {
 	
-	@Value("${security.oauth2.client.client-id}")
-	private String CLIENT_ID;
+	// Log
+	private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 	
+	// OAuth2 client_secret
 	@Value("${security.oauth2.client.client-secret}")
 	private String CLIENT_SECRET;
 	
-	private String REDIRECT_URI = "http://localhost:8080/oauth/token";
-	private String code;
+	@Autowired
+	private MemberRepository memberRepository;
 	
 	// 인증 결과 정보
 	private JSONObject AUTH_INFO;
+	
+	// 토큰 인증 정보
+	private JSONObject TOKEN_INFO;
     
 
+	/**
+	 * 로그인 정보를 통해 OAuth2 Token 발급
+	 * @param LOGIN_INFO
+	 * @return 토큰정보
+	 */
 	public JSONObject getOAuth2Token(final Map<String, String> LOGIN_INFO) {
 
-		System.out.println("실행");
+		// 로그인 정보
+		final String userName = LOGIN_INFO.get("username");
+		final String password = LOGIN_INFO.get("password");
 		
+		// 회원 정보 조회
+		final Member member = memberRepository.findByEmail(userName);
+		
+		// access_token 요청 파라미터
+		final String CLIENT_ID = member.getClientId();
 		final String AUTH_HOST = "http://" + CLIENT_ID + ":" + CLIENT_SECRET + "@localhost:8080";
-	    final String tokenRequestUrl = AUTH_HOST + "/oauth/token";
-	    final String userName = LOGIN_INFO.get("username");
-	    final String password = LOGIN_INFO.get("password");
+		final String tokenRequestUrl = AUTH_HOST + "/oauth/token";
+		
+		log.info("[TOKEN REQUEST]" + tokenRequestUrl);
 
-	    final List<NameValuePair> postParams = new ArrayList<NameValuePair>();
+		
+		// access_token 반환 StringBuffer
+		final StringBuffer buffer;
+		
+		// 토큰 값 확인을 위한 필수 파라미터
+		final List<NameValuePair> postParams = new ArrayList<NameValuePair>();
+		
+		postParams.add(new BasicNameValuePair("username", userName));
+		postParams.add(new BasicNameValuePair("password", password));
+		postParams.add(new BasicNameValuePair("grant_type", "password"));
+
+		final HttpPost post = new HttpPost(tokenRequestUrl);
+
+	    try {
+	    	
+	    	buffer = httpClientBuild("POST", post, null, postParams);
+	    	log.info(buffer.toString());
+  
+	    	// 결과 데이터를 JSON 으로 담기
+	    	AUTH_INFO = new JSONObject(buffer.toString());
+	    	log.info("result after JSON parse");
+
+	    } catch (JSONException e) {
+			e.printStackTrace();
+		} 
 	    
+	    return AUTH_INFO;
+		
+	}
+	
+	/**
+	 * JWT OAuth2 Token 인증
+	 * @param JWTToken
+	 * @return 토큰 인증 결과
+	 */
+	public JSONObject checkOAuth2Token(final String JWTToken) {
+
+		// access_token 인증 URL
+		final String AUTH_HOST = "http://localhost:8080";
+	    final String tokenRequestUrl = AUTH_HOST + "/oauth/check_token";
+	    final HttpGet get = new HttpGet(tokenRequestUrl + "?token=" + JWTToken);
 	    
-	    //postParams.add(new BasicNameValuePair("client_id", CLIENT_ID));
-	    //postParams.add(new BasicNameValuePair("client_sercret", CLIENT_SECRET));
-	    //postParams.add(new BasicNameValuePair("redirect_uri", REDIRECT_URI));
-	    //postParams.add(new BasicNameValuePair("code", code));
-	    postParams.add(new BasicNameValuePair("username", userName));
-	    postParams.add(new BasicNameValuePair("password", password));
-	    postParams.add(new BasicNameValuePair("grant_type", "password"));
+	    log.info("[TOKEN CHECK]" + tokenRequestUrl);
 	    
+	    // 인증 반환 StringBuffer
+	    final StringBuffer buffer;
+	    
+	    try {
+	    	
+	    	buffer = httpClientBuild("GET", null, get, null);
+	    	
+	    	log.info(buffer.toString());
+	      
+	    	// 결과 데이터를 JSON 으로 담기
+	    	TOKEN_INFO = new JSONObject(buffer.toString());
+	    	log.info("result after JSON parse");
+	    	
+
+	    } catch (JSONException e) {
+	    	
+			e.printStackTrace();
+			
+		}
+	    
+	    return TOKEN_INFO;
+		
+	}
+	
+	/**
+	 * refresh_token 을 이용한 OAuth2 access_token 재발급
+	 * @param LOGIN_INFO
+	 * @return 토큰정보
+	 */
+	public JSONObject refreshOAuth2Token(final String email) {
+
+		// 회원 정보 조회
+		final Member member = memberRepository.findByEmail(email);
+	    
+		// refresh_token 요청 파라미터
+		final String CLIENT_ID = member.getClientId();
+		final String AUTH_HOST = "http://" + CLIENT_ID + ":" + CLIENT_SECRET + "@localhost:8080";
+		final String tokenRequestUrl = AUTH_HOST + "/oauth/token";
+	    
+		log.info("[TOKEN REFRESH]" + tokenRequestUrl);
+		
+		// refresh_token 반환 StringBuffer
+		final StringBuffer buffer;
+	    
+	    // 발급된 refresh_token 이 있는 경우
+	    if(member.getRefreshToken() != null) {
+	    	
+	    	// 토큰 값 확인을 위한 필수 파라미터
+	    	final List<NameValuePair> postParams = new ArrayList<NameValuePair>();
+	    	
+		    postParams.add(new BasicNameValuePair("username", member.getEmail()));
+		    postParams.add(new BasicNameValuePair("password", member.getPassword()));
+		    postParams.add(new BasicNameValuePair("grant_type", "refresh_token"));
+		    postParams.add(new BasicNameValuePair("refresh_token", member.getRefreshToken()));
+		    
+		    final HttpPost post = new HttpPost(tokenRequestUrl);
+
+		    try {
+		    	
+		    	// OAuth2 서버로부터 토큰정보 확인
+		    	buffer = httpClientBuild("POST", post, null, postParams);
+
+		    	log.info(buffer.toString());
+	  
+		    	// 결과 데이터를 JSON 으로 담기
+		    	AUTH_INFO = new JSONObject(buffer.toString());
+		    	log.info("result after JSON parse");
+
+		    } catch (JSONException e) {
+		    	
+				e.printStackTrace();
+				
+			}
+		    
+		    log.info("refresh end");
+		    return AUTH_INFO;
+			
+	    }
+	    
+	    return new JSONObject();
+	    
+	}
+	
+	/**
+	 * HttpClient 사용을 위한 메서드
+	 * @param requestType
+	 * @param post
+	 * @param get
+	 * @param params
+	 * @return StringBuffer
+	 */
+	private StringBuffer httpClientBuild(String requestType, HttpPost post, HttpGet get, List<NameValuePair> params) {
 
 	    final HttpClient client = HttpClientBuilder.create().build();
-	    final HttpPost post = new HttpPost(tokenRequestUrl);
 
 	    BufferedReader rd = null;
 	    InputStreamReader isr = null;
+	    HttpResponse response = null;
+	    StringBuffer buffer = new StringBuffer();
+	    
 	    try {
-	      post.setEntity(new UrlEncodedFormEntity(postParams));
+	    	
+		    if(requestType.equals("POST")) {
+		    	
+		    	// 파라미터 설정
+		    	post.setEntity(new UrlEncodedFormEntity(params));
+		    	response = client.execute(post);
 
-	      final HttpResponse response = client.execute(post);
+		    }
+		    
+		    if(requestType.equals("GET")) {
+		    	
+		    	response = client.execute(get);
 
-	      final int responseCode = response.getStatusLine().getStatusCode();
+		    }
+		    
+	    	isr = new InputStreamReader(response.getEntity().getContent());
+	    	rd = new BufferedReader(isr);
 
-	      System.out.println("\nSending 'POST' request to URL : " + tokenRequestUrl);
-	      System.out.println("Post parameters : " + postParams);
-	      System.out.println("Response Code : " + responseCode);
+	    	String line;
+	    	while ((line = rd.readLine()) != null) {
+	    		buffer.append(line);
+	    	}
 
-	      isr = new InputStreamReader(response.getEntity().getContent());
-	      rd = new BufferedReader(isr);
-
-	      final StringBuffer buffer = new StringBuffer();
-	      String line;
-	      while ((line = rd.readLine()) != null) {
-	        buffer.append(line);
-	      }
-
-	      System.out.println(buffer.toString());
-	      
-	      // 결과 데이터를 JSON 으로 담기
-	      AUTH_INFO = new JSONObject(buffer.toString());
-		  System.out.println("result after JSON parse");
-		  System.out.println(AUTH_INFO.getString("access_token"));
+	    	return buffer;
 
 	    } catch (UnsupportedEncodingException e) {
 	      e.printStackTrace();
@@ -102,9 +253,7 @@ public class ClientTokenService {
 	      e.printStackTrace();
 	    } catch (IOException e) {
 	      e.printStackTrace();
-	    } catch (JSONException e) {
-			e.printStackTrace();
-		} finally {
+	    } finally {
 	        // clear resources
 	        if (rd != null) {
 	            try {
@@ -120,7 +269,7 @@ public class ClientTokenService {
 	         }
 	    }
 	    
-	    return AUTH_INFO;
-		
+		return buffer;
 	}
+	
 }

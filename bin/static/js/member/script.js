@@ -115,44 +115,7 @@ $(document).ready(function() {
 	$("#btn-login").on("click", function () {
 		
 		$("#form").submit();
-		return false;
 		
-		var data = {
-			client_id: "subin",
-			client_secret: "123",
-			response_type: "code",
-			//user_oauth_approval: "true",
-			email: $("#email").val(),
-		    password: $("#password").val(),
-		    grant_type: "password",
-		    redirect_uri: "localhost:8080/board/list"
-		};
-		
-		alert($.param(data));
-		
-	    $.ajax({
-	        type: "POST",
-	        url: "/oauth/token",
-	        dataType: "json",
-	        //contentType: "application/json; charset=utf-8",
-	        //data: JSON.stringify(data),
-	        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-	        data: $.param(data),
-	        success:function(result){   
-	        	
-	        	alert(result);
-	        	
-	        	alert("token : " + result["access_token"]);
-	        	alert("로그인에 성공하였습니다.");
-	        	location.href = "/board/list";
-	        	
-	        }, 
-	        error:function(e){  
-	            alert("로그인에 실패하였습니다.");  
-	        } 
-	
-	    });
-		    
 	});
 	
 	// 이메일 중복확인
@@ -204,7 +167,7 @@ function setEmailUniqueCheck(flag) {
 	
 	$("#emailUniqueCheck").val(flag);
 	
-	if(flag == "Y") {
+	if(flag === "Y") {
 		
 		$("#btn-email-check").attr("class", "btn btn-success btn-user btn-block");
 		$("#btn-email-check").html("이메일 중복확인 완료");

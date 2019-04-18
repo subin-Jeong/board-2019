@@ -26,6 +26,10 @@ table th {
 	font-size: 0.7em;	
 }
 
+.font-size-smid {
+	font-size: 0.9em;
+}
+
 .font-bold {
 	font-weight: bold;
 }

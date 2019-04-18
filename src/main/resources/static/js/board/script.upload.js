@@ -49,7 +49,7 @@ $(document).ready(function() {
 			contentType: false,
 			success: function(data) {
 				
-				if(data == "") {
+				if(data === "") {
 					alert("JPG, PNG, GIF 파일만 업로드 가능합니다.");
 					return;
 				}
@@ -101,13 +101,18 @@ function saveFile(bNo) {
 	        data: JSON.stringify(uploadData),
 	        success:function(args){   
 	        	
-	        	if(args["result"] == "200") {
+	        	if(args === "Y") {
 	        		
 	        		alert("첨부파일이 등록되었습니다.");
 	        		
-	        	} else if(args["result"] == "OVER") {
+	        	} else if(args === "OVER") {
 	        		
 	        		alert("첨부파일을 5개 이상 등록하실 수 없습니다.");
+	        		
+	        	} else {
+	        
+	        		alert("첨부파일 등록에 실패했습니다.");
+	        		
 	        	}
 	        	
 	        }, 

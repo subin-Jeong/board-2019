@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	
 	// 초기 게시글 목록
-	if($("#boardList").length > 0 && $("#pageNum").val() == 0) {
+	if($("#boardList").length > 0 && $("#pageNum").val() === "0") {
 		getBoardList(1);
 	}
 	
@@ -14,7 +14,6 @@ $(document).ready(function() {
 	    var delFlag = "N";
 	    var modifyDate = $("#modify_date").val();
 	    var regDate = $("#reg_date").val();
-	    var writer = "test";
 	    var groupNo = ($("#group_no").val()) ? $("#group_no").val() : 0;
 	    var groupSeq = ($("#group_seq").val()) ? $("#group_seq").val() : 0;
 	    var parentNo = ($("#parent_no").val()) ? $("#parent_no").val() : 0;
@@ -31,7 +30,6 @@ $(document).ready(function() {
 		    delFlag: delFlag,
 		    modifyDate: modifyDate,
 		    regDate: regDate,
-		    writer: writer,
 		    groupNo: groupNo,
 			groupSeq: groupSeq,
 			parentNo: parentNo,
@@ -118,7 +116,7 @@ $(document).ready(function() {
 		}
 		
 	    $.ajax({
-	        type: "PUT",
+	        type: "DELETE",
 	        url: "/board/delete/" + bNo,
 	        success:function(args){   
 	        	
@@ -180,12 +178,12 @@ $(document).ready(function() {
 				
 				"render": function(data, type, row){
 				
-			        if(type=="display"){
+			        if(type === "display"){
 			        	
-			        	if(data.substring(0,1) == "/") {
-			        		return "<img src=\"/upload" + data + "\">";
+			        	if(data.substring(0,1) === "/") {
+			        		return "<img src='/upload" + data + "'>";
 			        	} else {
-			        		return "<img src=\"/upload/" + data + "\">";
+			        		return "<img src='/upload/" + data + "'>";
 			        	}
 			            
 			        }
@@ -196,12 +194,12 @@ $(document).ready(function() {
 				
 				"render": function(data, type, row){
 					
-			        if(type=="display"){
+			        if(type === "display"){
 			        	
-			        	if(data.substring(0,1) == "/") {
-			        		return "<a href=\"/upload" + data + "\" style=\"text-decoration:none;\">" + data.substring(data.lastIndexOf("_") + 1) + "</a>";
+			        	if(data.substring(0,1) === "/") {
+			        		return "<a href='/upload" + data + "' style='text-decoration:none;'>" + data.substring(data.lastIndexOf("_") + 1) + "</a>";
 			        	} else {
-			        		return "<a href=\"/upload/" + data + "\" style=\"text-decoration:none;\">" + data + "</a>";
+			        		return "<a href='/upload/" + data + "' style='text-decoration:none;'>" + data + "</a>";
 			        	}   
 			        }
 			        
@@ -225,10 +223,17 @@ $(document).ready(function() {
 				 
 				 "render": function(data, type){
 					 	
-					 btnStr = "<a href=\"#\" onclick=\"deleteFile('" + data + "')\" class=\"btn btn-danger btn-icon-split\">";
-					 btnStr+= "<span class=\"text\">삭제</span>";
-					 btnStr+= "</a>";
-				     
+					 var btnStr = "";
+					 
+					 // 작성자만 삭제 가능
+					 if($("#userCheck").val() === "Y" ) {
+					
+						 btnStr+= "<a href='#' onclick='deleteFile(" + data + ")' class='btn btn-danger btn-icon-split'>";
+						 btnStr+= "<span class='text'>삭제</span>";
+						 btnStr+= "</a>";
+					     
+					 }
+					 
 					 return btnStr;
 				 }
 			}]
@@ -253,7 +258,6 @@ $(document).ready(function() {
 			boardNo: bNo,
 		    content: $("#contents").val(),
 		    delFlag: "N",
-		    writer: "test",
 		    groupNo: ($("#group_no").val()) ? $("#group_no").val() : 0,
 			groupSeq: ($("#group_seq").val()) ? $("#group_seq").val() : 0,
 			parentNo: ($("#parent_no").val()) ? $("#parent_no").val() : 0,
@@ -281,7 +285,7 @@ $(document).ready(function() {
 	});
 	
 	// 초기 댓글 목록
-	if($("#replyList").length > 0 && $("#pageNum").val() == 0) {
+	if($("#replyList").length > 0 && $("#pageNum").val() === "0") {
 		getReplyList(1);
 	}
 	
@@ -303,7 +307,6 @@ $(document).ready(function() {
 			boardNo: bNo,
 		    content: $("#replyModal #reply_contents").val(),
 		    delFlag: "N",
-		    writer: "test",
 		    groupNo: ($("#group_no").val()) ? $("#group_no").val() : 0,
 			groupSeq: ($("#group_seq").val()) ? $("#group_seq").val() : 0,
 			parentNo: (rNo) ? rNo : 0,
@@ -348,7 +351,6 @@ $(document).ready(function() {
 			boardNo: bNo,
 		    content: $("#replyModifyModal #reply_contents").val(),
 		    delFlag: "N",
-		    writer: "test",
 			parentNo: (rNo) ? rNo : 0
 		};
 		
@@ -360,7 +362,15 @@ $(document).ready(function() {
 	        data: JSON.stringify(data),
 	        success:function(args){   
 	        	
-	        	alert("수정되었습니다.")
+	        	if(args["no"] > 0) {
+
+		        	alert("수정되었습니다.");
+	        	
+	        	} else {
+	        		
+	        		alert("작성자만 수정 가능합니다.");
+	        	}
+	        	
 		        location.href = "/board/detail/" + bNo;   
 	        	
 	        }, 
@@ -408,12 +418,20 @@ function deleteReply(rNo) {
 	}
 	
 	$.ajax({
-        type: "PUT",
+        type: "DELETE",
         url: "/reply/delete/" + rNo,
         success:function(args){   
         	
-        	alert("삭제되었습니다.");
-        	location.href = "/board/detail/" + $("#no").val();   
+        	if(args) {
+
+            	alert("삭제되었습니다.");
+            	location.href = "/board/detail/" + $("#no").val();   
+        		
+        	} else {
+
+        		alert("작성자만 삭제 가능합니다.");
+        		
+        	}
         	
         }, 
         error:function(e){   
@@ -430,12 +448,20 @@ function deleteFile(fNo) {
 	}
 	
 	$.ajax({
-        type: "PUT",
+        type: "DELETE",
         url: "/board/deleteFile/" + fNo,
         success:function(args){   
         	
-        	alert("삭제되었습니다.");
-        	location.href = "/board/detail/" + $("#no").val();   
+        	if(args) {
+
+            	alert("삭제되었습니다.");
+            	location.href = "/board/detail/" + $("#no").val();
+        		
+        	} else {
+        		
+        		alert("작성자만 삭제 가능합니다.");
+        		
+        	}   
         	
         }, 
         error:function(e){   
@@ -485,7 +511,7 @@ function drawList(listObj) {
 		
 		// title
 		var titleHTML = "";
-        titleHTML+= "<a href=\"/board/detail/"+  list["no"] +"\" style=\"text-decoration:none; color:#858796;\"><b>";
+        titleHTML+= "<a href='/board/detail/"+  list["no"] +"' style='text-decoration:none; color:#858796;'><b>";
         
         // depth 만큼 들여쓰기
         var loopNum = list["depth"];
@@ -495,7 +521,7 @@ function drawList(listObj) {
         
         // 답글의 경우 화살표 아이콘
         if(list["depth"] > 0) {
-        	titleHTML+= "<img src=\"/img/icon-forward.png\" width=12 height=12>&nbspRE:&nbsp";
+        	titleHTML+= "<img src='/img/icon-forward.png' width=12 height=12>&nbspRE:&nbsp";
         }
         
         titleHTML+= list["title"];
@@ -511,13 +537,13 @@ function drawList(listObj) {
 		}	
 		
 		// list
-        listHTML+= "<tr role=\"row\" class=\"odd\">";
-		listHTML+= "	<td class=\"dt-body-center\">" + list["no"] + "</td>";
-		listHTML+= "	<td class=\"dt-body-left\">";
+        listHTML+= "<tr role='row' class='odd'>";
+		listHTML+= "	<td class='dt-body-center'>" + list["no"] + "</td>";
+		listHTML+= "	<td class='dt-body-left'>";
 		listHTML+= 		titleHTML;
 		listHTML+= "	</td>";
-		listHTML+= "	<td class=\"dt-body-center\">" + regDate + "</td>";
-		listHTML+= "	<td class=\"dt-body-center\">" + list["writer"] + "</td>";
+		listHTML+= "	<td class='dt-body-center'>" + regDate + "</td>";
+		listHTML+= "	<td class='dt-body-center'>" + list["writer"] + "</td>";
 		listHTML+= "</tr>";
 		
 	}
@@ -575,7 +601,7 @@ function drawReplyList(listObj) {
         
         // 답글의 경우 화살표 아이콘
         if(list["depth"] > 0) {
-        	titleHTML+= "<img src=\"/img/icon-forward.png\" width=12 height=12>&nbsp&nbsp";
+        	titleHTML+= "<img src='/img/icon-forward.png' width=12 height=12>&nbsp&nbsp";
         }
         
         titleHTML+= list["content"];
@@ -592,22 +618,22 @@ function drawReplyList(listObj) {
 		}	
 		
 		// 답글, 수정, 삭제 버튼
-		btnStr = "<a href=\"#\" onclick=\"setReplyNo('" + list["no"] + "')\" class=\"btn btn-success btn-icon-split\" data-toggle=\"modal\" data-target=\"#replyModal\">";
-		btnStr+= "<span class=\"text\">답글</span>";
+		btnStr = "<a href='#' onclick='setReplyNo(" + list["no"] + ")' class='btn btn-success btn-icon-split' data-toggle='modal' data-target='#replyModal'>";
+		btnStr+= "<span class='text'>답글</span>";
 		btnStr+= "</a> ";
-		btnStr+= "<a href=\"#\" onclick=\"setReplyNo('" + list["no"] + "'); setReplyData('" + list["no"] + "');\" class=\"btn btn-warning btn-icon-split\" data-toggle=\"modal\" data-target=\"#replyModifyModal\">";
-		btnStr+= "<span class=\"text\">수정</span>";
+		btnStr+= "<a href='#' onclick='setReplyNo(" + list["no"] + "); setReplyData(" + list["no"] + ");' class='btn btn-warning btn-icon-split' data-toggle='modal' data-target='#replyModifyModal'>";
+		btnStr+= "<span class='text'>수정</span>";
 		btnStr+= "</a> ";
-		btnStr+= "<a href=\"#\" onclick=\"deleteReply('" + list["no"] + "')\" class=\"btn btn-danger btn-icon-split\">";
-		btnStr+= "<span class=\"text\">삭제</span>";
+		btnStr+= "<a href='#' onclick='deleteReply(" + list["no"] + ")' class='btn btn-danger btn-icon-split'>";
+		btnStr+= "<span class='text'>삭제</span>";
 		btnStr+= "</a>";
 		
 		// list
-        listHTML+= "<tr role=\"row\" class=\"odd\">";
-		listHTML+= "	<td class=\"dt-body-left\">" + titleHTML + "</td>";
-		listHTML+= "	<td class=\"dt-body-center\">" + regDate + "</td>";
-		listHTML+= "	<td class=\"dt-body-center\">" + list["writer"] + "</td>";
-		listHTML+= "	<td class=\"dt-body-center\">" + btnStr + "</td>";
+        listHTML+= "<tr role='row' class='odd'>";
+		listHTML+= "	<td class='dt-body-left'>" + titleHTML + "</td>";
+		listHTML+= "	<td class='dt-body-center'>" + regDate + "</td>";
+		listHTML+= "	<td class='dt-body-center'>" + list["writer"] + "</td>";
+		listHTML+= "	<td class='dt-body-center'>" + btnStr + "</td>";
 		listHTML+= "</tr>";
 		
 	}
@@ -624,7 +650,7 @@ function drawPagination(type, totalPages) {
 	var targetUrl = "/" + type + "/getList";
 	
 	// 댓글은 원글 번호 필요
-	if(type == "reply") {
+	if(type === "reply") {
 		
 		targetUrl+= "/" + $("#no").val();
 		
@@ -636,7 +662,7 @@ function drawPagination(type, totalPages) {
 		
 		total: totalPages,
      page: pageNum,
-     maxVisible: (type == "reply") ? 5 : 10,
+     maxVisible: (type === "reply") ? 5 : 10,
      leaps: true,
      firstLastUse: true,
      first: "처음",
@@ -663,12 +689,12 @@ function drawPagination(type, totalPages) {
 		    	// 페이지 설정
 		    	$("#pageNum").val(num);
 		    	
-		    	if(type == "board") {
+		    	if(type === "board") {
 		    		
 		    		// 게시글 리스트 새로 생성
 			    	drawList(result["content"]);
 		    		
-		    	} else if (type == "reply") {
+		    	} else if (type === "reply") {
 		    		
 		    		// 댓글 리스트 새로 생성
 		    		drawReplyList(result["content"]);
