@@ -68,6 +68,16 @@ public class WebConfig implements WebMvcConfigurer {
 		
 		converters.add(escapingConverter());
 	}
+	
+	/**
+	 * 첨부파일 외부 업로드 경로 설정
+	 */
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		
+		registry.addResourceHandler("/upload/**").addResourceLocations("file:///C:/Users/JSB/AppData/Roaming/upload/");
+		
+	}
 
 	
 	@Override
@@ -84,9 +94,6 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addFormatters(FormatterRegistry registry) {}
-
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {}
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {}

@@ -168,12 +168,12 @@ public class MemberController {
 	@ResponseBody
 	public String refresh(Principal principal, HttpServletRequest request, HttpServletResponse response) throws JSONException, IOException {
 		
-		String email = principal.getName();
-		
-		if(email != null) {
+		if(principal != null) {
+			
+			String email = principal.getName();
 			
 			JSONObject AUTH_INFO = clientTokenService.refreshOAuth2Token(email);
-			if(AUTH_INFO.getString("access_token") != null) {
+			if(AUTH_INFO.has("access_token")) {
 				
 				// Token 유효
 				// 기존 access_token 쿠키를 비유효 처리 후, 새로 부여
@@ -193,6 +193,7 @@ public class MemberController {
 				// 새로운 쿠키 발급
 				Cookie addCookie = new Cookie("access_token", AUTH_INFO.getString("access_token"));
 				addCookie.setPath("/");
+				addCookie.setHttpOnly(true);
 				response.addCookie(addCookie);
 				
 				// 추후 access_token 재발급을 위해 refresh_token 저장
@@ -203,7 +204,18 @@ public class MemberController {
 				
 				}
 				
+				// refresh_token 으로 새로운 access_token 발급 성공
 				return HttpStatus.OK.toString();
+				
+			} else if(AUTH_INFO.has("error")) {
+				
+				if(AUTH_INFO.getString("error_description").contains("expired")) {
+					
+					// refresh_token 만료, access_token 재발급 불가
+					return HttpStatus.NO_CONTENT.toString();
+					
+				} 
+				
 			}
 			
 			return HttpStatus.BAD_REQUEST.toString();
@@ -233,14 +245,18 @@ public class MemberController {
 		request.getSession(false);
 		
 		Cookie[] cookies = request.getCookies();
-		for(Cookie cookie : cookies) {
+		if(cookies != null) {
 			
-			if(cookie.getName().equals("access_token")) {
+			for(Cookie cookie : cookies) {
 				
-				Cookie removeCookie = new Cookie(cookie.getName(), null);
-				removeCookie.setPath("/");
-				removeCookie.setMaxAge(0);
-				response.addCookie(removeCookie);
+				if(cookie.getName().equals("access_token")) {
+					
+					Cookie removeCookie = new Cookie(cookie.getName(), null);
+					removeCookie.setPath("/");
+					removeCookie.setMaxAge(0);
+					response.addCookie(removeCookie);
+				}
+				
 			}
 			
 		}

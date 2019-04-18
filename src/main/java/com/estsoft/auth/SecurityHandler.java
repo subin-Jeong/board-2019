@@ -59,7 +59,6 @@ public class SecurityHandler implements AuthenticationSuccessHandler, Authentica
 			log.info("refresh_token : " + AUTH_INFO.getString("refresh_token"));
 			log.info("expires_in : " + AUTH_INFO.getString("expires_in"));
 			log.info("scope : " + AUTH_INFO.getString("scope"));
-			log.info("jti : " + AUTH_INFO.getString("jti"));
 			
 			if(AUTH_INFO.getString("access_token") != null) {
 				
@@ -67,6 +66,9 @@ public class SecurityHandler implements AuthenticationSuccessHandler, Authentica
 				// 쿠키에 토큰정보를 추가
 				Cookie addCookie = new Cookie("access_token", AUTH_INFO.getString("access_token"));
 				addCookie.setMaxAge(Integer.parseInt(AUTH_INFO.getString("expires_in")));
+				
+				// 쿠키 값 브라우저에서 접근 방어
+				addCookie.setHttpOnly(true);
 				
 				response.addCookie(addCookie);
 				

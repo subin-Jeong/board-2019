@@ -25,7 +25,7 @@ import com.estsoft.service.ClientTokenService;
  * @author JSB
  */
 @Component
-public class JWTInterceptor implements HandlerInterceptor {
+public class WebInterceptor implements HandlerInterceptor {
 
 	// Log
 	private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
@@ -57,18 +57,23 @@ public class JWTInterceptor implements HandlerInterceptor {
 		
 		// 쿠키에 있는 JWT access_token 값을 통해 토큰 확인
 		Cookie[] cookies = request.getCookies();
-		for(Cookie cookie : cookies) {
+		
+		if(cookies != null) {
 			
-			// 만료기간이 남아있는 토큰을 사용하여 인증
-			if(cookie.getName().equals("access_token") && cookie.getMaxAge() != 0) {
+			for(Cookie cookie : cookies) {
 				
-				JWTToken = cookie.getValue();
-				break;
+				// 만료기간이 남아있는 토큰을 사용하여 인증
+				if(cookie.getName().equals("access_token") && cookie.getMaxAge() != 0) {
 					
+					JWTToken = cookie.getValue();
+					break;
+						
+				}
+				
 			}
 			
 		}
-		
+
 		log.info("token is " + JWTToken);
 		
 		if(principal != null) {
@@ -102,8 +107,6 @@ public class JWTInterceptor implements HandlerInterceptor {
 			if(TOKEN_INFO.has("user_name")) {
 				
 				log.info("login username : " + TOKEN_INFO.getString("user_name"));
-				
-				
 				principal.setExpireTime(Long.parseLong(TOKEN_INFO.getString("exp")));
 				
 				// 정상 로그인

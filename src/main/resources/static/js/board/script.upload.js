@@ -13,14 +13,14 @@ $(document).ready(function() {
 	});
 	
 	// 이미지 Drag & Drop
-	$(".fileDrop").on("dragenter dragover", function(event) {
+	$("#fileDrop").on("dragenter dragover", function(event) {
 		
 		// 기본 효과 방지
 		event.preventDefault();
 		
 	});
 	
-	$(".fileDrop").on("drop", function(event) {
+	$("#fileDrop").on("drop", function(event) {
 		
 		// 기본 효과 방지
 		event.preventDefault();
@@ -57,8 +57,8 @@ $(document).ready(function() {
 				var originFileName = data.substring(data.lastIndexOf("_") + 1);
 				var uploadFileInput = "<input name=\"uploaded_files\" type=\"hidden\" value=\"" + data + "\">";
 				
-				$(".uploadedList").append(originFileName + "<br />");
-				$(".uploadedList").append(uploadFileInput);
+				$("#uploadedList").append(originFileName + "<br />");
+				$("#uploadedList").append(uploadFileInput);
 				
 			}
 			
