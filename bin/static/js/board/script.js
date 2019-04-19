@@ -170,8 +170,8 @@ $(document).ready(function() {
 		ordering: false,
 		ServerSide: false,
 		searching: false,
-		sAjaxSource : "/board/getFile/" + $("#no").val(),
-        sServerMethod: "POST",
+		sAjaxSource : "/board/file/" + $("#no").val(),
+        sServerMethod: "GET",
 		sAjaxDataProp: "",
 		columns: [
 			{ data: "filename",
@@ -394,8 +394,8 @@ function setReplyNo(n) {
 function setReplyData(n) {
 	
 	$.ajax({
-        type: "POST",
-        url: "/reply/getReply/" + n,
+        type: "GET",
+        url: "/reply/detail/" + n,
         dataType: "json",
         contentType: "application/json; charset=utf-8",
         success:function(result){   
@@ -475,8 +475,8 @@ function deleteFile(fNo) {
 function getBoardList(page) {
 	
 	$.ajax({
-	    type: "POST",
-	    url: "/board/getList/" + page,
+	    type: "GET",
+	    url: "/board/list/" + page,
 	    dataType: "json",
 	    contentType: "application/json; charset=utf-8",
 	    success:function(result){   
@@ -556,8 +556,8 @@ function drawList(listObj) {
 function getReplyList(page) {
 	
 	$.ajax({
-	    type: "POST",
-	    url: "/reply/getList/" + $("#no").val() + "/" + page,
+	    type: "GET",
+	    url: "/reply/list/" + $("#no").val() + "/" + page,
 	    dataType: "json",
 	    contentType: "application/json; charset=utf-8",
 	    success:function(result){   
@@ -647,7 +647,7 @@ function drawPagination(type, totalPages) {
 
 	// 페이징 대상 Obj
 	var targetObj = "#" + type + "ListPagination"; 
-	var targetUrl = "/" + type + "/getList";
+	var targetUrl = "/" + type + "/list";
 	
 	// 댓글은 원글 번호 필요
 	if(type === "reply") {
@@ -680,7 +680,7 @@ function drawPagination(type, totalPages) {
 	}).on("page", function(event, num){
 
 		$.ajax({
-		    type: "POST",
+		    type: "GET",
 		    url: targetUrl + "/" + num,
 		    dataType: "json",
 		    contentType: "application/json; charset=utf-8",

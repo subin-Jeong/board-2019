@@ -13,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,9 +41,9 @@ public class ReplyController {
 	 * @param bNo
 	 * @return 전체 댓글 List
 	 */
-	@PostMapping("/getList/{bNo}/{pageNum}")
+	@GetMapping("/list/{bNo}/{pageNum}")
 	@ResponseBody 
-	public Page<Reply> getList(@PathVariable int bNo, @PathVariable int pageNum, @PageableDefault(size = 100) Pageable pageable) {
+	public Page<Reply> list(@PathVariable int bNo, @PathVariable int pageNum, @PageableDefault(size = 100) Pageable pageable) {
 		PageRequest pageRequest = new PageRequest(pageNum - 1, pageable.getPageSize());	
 		return replyRepository.findAllByBoardNoOrdering(bNo, pageRequest); 
 	}
@@ -178,9 +179,9 @@ public class ReplyController {
 	 * @param rNo
 	 * @return 선택한 댓글 상세 Entity
 	 */
-	@PostMapping("/getReply/{rNo}")
+	@GetMapping("/detail/{rNo}")
 	@ResponseBody
-	public Reply getReply(@PathVariable int rNo) {
+	public Reply reply(@PathVariable int rNo) {
 		return replyRepository.findOne(rNo);
 	}
 	
@@ -200,7 +201,6 @@ public class ReplyController {
 		Reply updateReply = replyRepository.findOne(rNo);
 		
 		// 작성자만 수정 가능
-		log.info("여기서 업데이트?");
 		if(userInfo != null && updateReply.getWriter().equals(userInfo)) {
 
 			// 수정 시 내용 이외 기존 사항 반영

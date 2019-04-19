@@ -36,47 +36,43 @@ public class SecurityHandler implements AuthenticationSuccessHandler, Authentica
 	private MemberRepository memberRepository;
 	
 	// 인증 결과 정보
-	private JSONObject AUTH_INFO;
+	private JSONObject authInfo;
 	
 	// 로그인된 사용자 정보
-	private final Map<String, String> LOGIN_INFO = new HashMap<String, String>();
+	private final Map<String, String> loginInfo = new HashMap<String, String>();
 	
 	
 	// 로그인 성공 Handler
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+
+		// Oauth2 를 통한 Access Token 획득
+		loginInfo.put("username", request.getParameter("username"));
+		loginInfo.put("password", request.getParameter("password"));
 		
-		LOGIN_INFO.put("username", request.getParameter("username"));
-		LOGIN_INFO.put("password", request.getParameter("password"));
-		
-		// Oauth2 를 통한 JWT Token 획득
-		AUTH_INFO = clientTokenService.getOAuth2Token(LOGIN_INFO);
+		authInfo = clientTokenService.getOAuth2Token(loginInfo);
 		
 		try {
 			
-			log.info("access_token : " + AUTH_INFO.getString("access_token"));
-			log.info("token_type : " + AUTH_INFO.getString("token_type"));
-			log.info("refresh_token : " + AUTH_INFO.getString("refresh_token"));
-			log.info("expires_in : " + AUTH_INFO.getString("expires_in"));
-			log.info("scope : " + AUTH_INFO.getString("scope"));
-			
-			if(AUTH_INFO.getString("access_token") != null) {
+			// Access Token 토큰 발급 성공
+			if(authInfo.has("access_token")) {
+
+				log.info("[TOKEN VALUE] access_token : " + authInfo.getString("access_token"));
+				log.info("[TOKEN VALUE] token_type : " + authInfo.getString("token_type"));
+				log.info("[TOKEN VALUE] refresh_token : " + authInfo.getString("refresh_token"));
+				log.info("[TOKEN VALUE] expires_in : " + authInfo.getString("expires_in"));
+				log.info("[TOKEN VALUE] scope : " + authInfo.getString("scope"));				
 				
 				// Token 유효
 				// 쿠키에 토큰정보를 추가
-				Cookie addCookie = new Cookie("access_token", AUTH_INFO.getString("access_token"));
-				addCookie.setMaxAge(Integer.parseInt(AUTH_INFO.getString("expires_in")));
-				
-				// 쿠키 값 브라우저에서 접근 방어
-				addCookie.setHttpOnly(true);
-				
+				Cookie addCookie = clientTokenService.makeAccessTokenCookie(authInfo);
 				response.addCookie(addCookie);
 				
 				// 추후 access_token 재발급을 위해 refresh_token 저장
-				if(request.getParameter("username") != null && AUTH_INFO.has("refresh_token")) {
+				if(request.getParameter("username") != null && authInfo.has("refresh_token")) {
 					
 					String email = request.getParameter("username");
-					String refreshToken = AUTH_INFO.getString("refresh_token");
+					String refreshToken = authInfo.getString("refresh_token");
 					
 					memberRepository.updateRefreshTokenByEmail(email, refreshToken);
 				

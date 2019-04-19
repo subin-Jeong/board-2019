@@ -1,40 +1,33 @@
 package com.estsoft.auth;
 
-import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
-import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 
 /**
- * OAuth2 JWT Token 발급을 위한 권한 서버
+ * OAuth2 Access Token 발급을 위한 권한 서버
+ * @author JSB
+ * 
+ * 1. Access Token : 발급 시 매번 만료시각이 새로 갱신, client_id 마다 1개씩 발급 가능
+ * 2. Refresh Token : 첫 Access Token 발급 시 생성된 만료시각이 끝날 때 까지 유효, Access Token 이 재발급 되더라도 만료시각이 남아있다면 재사용
  */
 @Configuration
 @EnableAuthorizationServer
@@ -53,8 +46,10 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
     
     @Bean
     public TokenStore tokenStore() {
+    	
+    	// Token 정보 DB 관리
     	return new JdbcTokenStore(dataSource);
-        //return new JwtTokenStore(accessTokenConverter());
+    	
     }
     
     @Bean
@@ -70,19 +65,6 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
     }
     
     @Bean
-    public JwtAccessTokenConverter accessTokenConverter() {
-    	
-    	//DefaultAccessTokenConverter act = new DefaultAccessTokenConverter();
-    	//JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        
-    	final JWTAccessTokenCoverter converter = new JWTAccessTokenCoverter();
-    	converter.setSigningKey("estsoft-board");
-        
-        return converter;
-        
-    }
-
-    @Bean
     public PasswordEncoder oAuthPasswordEncoder() {
         return new BCryptPasswordEncoder(4);       
     }
@@ -90,15 +72,12 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
     
     /**
      * OAuth2 Create Token
-     * 생성된 Token 정보를 DataSource 에 접근해서 DB에 저장 후, JWT 토큰으로 변환하여 사용
      */
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
     	
-    	//endpoints.tokenStore(tokenStore()).accessTokenConverter(accessTokenConverter()).authenticationManager(authenticationManager).userDetailsService(userDetailsServiceImpl);
-    	//endpoints.tokenStore(tokenStore()).accessTokenConverter(accessTokenConverter()).authenticationManager(authenticationManager).userDetailsService(userDetailsServiceImpl);
-    	endpoints.tokenServices(tokenServices()).tokenStore(tokenStore()).authenticationManager(authenticationManager);
-    
+    	// tokenService 를 통해 커스텀된 access_token 생성
+    	endpoints.tokenServices(tokenServices()).tokenStore(tokenStore()).authenticationManager(authenticationManager); 
     }
     
     /**
@@ -123,22 +102,7 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
     	JdbcClientDetailsService jdbcClientDetailsService = new JdbcClientDetailsService(dataSource);
         clients.withClientDetails(jdbcClientDetailsService);
         
-        log.info("Resource Clients >>>" + jdbcClientDetailsService.listClientDetails().toString());
-        
-        /*
-        clients.inMemory()
-            .withClient(clientId)
-            .secret(clientSecret)
-            .autoApprove(true)
-            .resourceIds(clientId)
-            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit", "client_credentials")
-            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT", "ROLE_ADMIN")
-            .scopes("read", "write", "trust")
-            // access_token 유효기간 : 3분
-            .accessTokenValiditySeconds(180)
-            // refresh_token 유효기간 : 10분
-            .refreshTokenValiditySeconds(600);
-		*/
+        log.info("[OAuth2 Client List] " + jdbcClientDetailsService.listClientDetails().toString());
     }
 
     

@@ -112,6 +112,7 @@ public class MemberController {
 		if(oauthClient != null) {
 		
 			// 회원 테이블에 연관 client_id 저장
+			
 			member.setClientId(oauthClient.getClientId());
 			return memberRepository.save(member);
 			
@@ -127,7 +128,7 @@ public class MemberController {
 	 * @param email
 	 * @return 이메일로 확인된 회원정보
 	 */
-	@PostMapping("/getMember")
+	@GetMapping("/getMember")
 	@ResponseBody
 	public int getMember(@RequestBody Map<String, String> data) {
 		
@@ -147,18 +148,7 @@ public class MemberController {
 	
 	
 	/**
-	 * 로그인
-	 * @param member
-	 * @return 로그인한 Member Entity
-	 */
-	@PostMapping("/login")
-	@ResponseBody
-	public Member login(@RequestBody Member member) {
-		return memberRepository.findByEmail(member.getEmail());
-	}
-	
-	/**
-	 * access_token 갱신 (refresh_token 이용)
+	 * 수동 Access Token 갱신 (refresh_token 이용)
 	 * @param principal
 	 * @return
 	 * @throws JSONException 
@@ -172,8 +162,8 @@ public class MemberController {
 			
 			String email = principal.getName();
 			
-			JSONObject AUTH_INFO = clientTokenService.refreshOAuth2Token(email);
-			if(AUTH_INFO.has("access_token")) {
+			JSONObject authInfo = clientTokenService.refreshOAuth2Token(email);
+			if(authInfo.has("access_token")) {
 				
 				// Token 유효
 				// 기존 access_token 쿠키를 비유효 처리 후, 새로 부여
@@ -191,15 +181,15 @@ public class MemberController {
 				}
 				
 				// 새로운 쿠키 발급
-				Cookie addCookie = new Cookie("access_token", AUTH_INFO.getString("access_token"));
+				Cookie addCookie = new Cookie("access_token", authInfo.getString("access_token"));
 				addCookie.setPath("/");
 				addCookie.setHttpOnly(true);
 				response.addCookie(addCookie);
 				
 				// 추후 access_token 재발급을 위해 refresh_token 저장
-				if(AUTH_INFO.has("refresh_token")) {
+				if(authInfo.has("refresh_token")) {
 					
-					String refreshToken = AUTH_INFO.getString("refresh_token");
+					String refreshToken = authInfo.getString("refresh_token");
 					memberRepository.updateRefreshTokenByEmail(email, refreshToken);
 				
 				}
@@ -207,9 +197,9 @@ public class MemberController {
 				// refresh_token 으로 새로운 access_token 발급 성공
 				return HttpStatus.OK.toString();
 				
-			} else if(AUTH_INFO.has("error")) {
+			} else if(authInfo.has("error")) {
 				
-				if(AUTH_INFO.getString("error_description").contains("expired")) {
+				if(authInfo.getString("error_description").contains("expired")) {
 					
 					// refresh_token 만료, access_token 재발급 불가
 					return HttpStatus.NO_CONTENT.toString();

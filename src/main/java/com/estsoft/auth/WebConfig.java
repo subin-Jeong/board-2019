@@ -29,11 +29,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.estsoft.util.HTMLCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Web API 사용 시 필요 기능 설정
+ * @author JSB
+ * 
+ * 1. Access Token Check Interceptor 
+ * 2. XSS 방지 Filter
+ * 3. 첨부파일 외부 업로드 경로 설정
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
 	@Autowired
-	@Qualifier(value = "JWTInterceptor")
 	private HandlerInterceptor interceptor;
 	
 	@Bean
@@ -49,7 +56,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
 	/**
-	 * 게시판 접근 시 JWT Token 확인
+	 * 게시판 접근 시 Access Token 확인
 	 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {

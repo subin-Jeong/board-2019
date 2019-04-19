@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,7 +49,7 @@ public class FileController {
 	 * @param bNo
 	 * @return 전체 첨부파일 List
 	 */
-	@PostMapping("/getFile/{bNo}")
+	@GetMapping("/file/{bNo}")
 	@ResponseBody 
 	public List<File> getFile(@PathVariable int bNo) {
 		return fileRepository.findAllByBoardNoOrdering(bNo);

@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpRequest;
+import javax.servlet.http.Cookie;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -34,6 +35,7 @@ import com.estsoft.repository.api.MemberRepository;
 
 /**
  * 토큰 발급을 위한 사용자 API 클래스
+ * @author JSB
  */
 @Service
 @Component
@@ -50,10 +52,10 @@ public class ClientTokenService {
 	private MemberRepository memberRepository;
 	
 	// 인증 결과 정보
-	private JSONObject AUTH_INFO;
+	private JSONObject authInfo;
 	
 	// 토큰 인증 정보
-	private JSONObject TOKEN_INFO;
+	private JSONObject tokenInfo;
     
 
 	/**
@@ -75,7 +77,7 @@ public class ClientTokenService {
 		final String AUTH_HOST = "http://" + CLIENT_ID + ":" + CLIENT_SECRET + "@localhost:8080";
 		final String tokenRequestUrl = AUTH_HOST + "/oauth/token";
 		
-		log.info("[TOKEN REQUEST]" + tokenRequestUrl);
+		log.info("[REQUEST ACCESS TOKEN URL] " + tokenRequestUrl);
 
 		
 		// access_token 반환 StringBuffer
@@ -96,14 +98,13 @@ public class ClientTokenService {
 	    	log.info(buffer.toString());
   
 	    	// 결과 데이터를 JSON 으로 담기
-	    	AUTH_INFO = new JSONObject(buffer.toString());
-	    	log.info("result after JSON parse");
+	    	authInfo = new JSONObject(buffer.toString());
 
 	    } catch (JSONException e) {
 			e.printStackTrace();
 		} 
 	    
-	    return AUTH_INFO;
+	    return authInfo;
 		
 	}
 	
@@ -119,7 +120,7 @@ public class ClientTokenService {
 	    final String tokenRequestUrl = AUTH_HOST + "/oauth/check_token";
 	    final HttpGet get = new HttpGet(tokenRequestUrl + "?token=" + JWTToken);
 	    
-	    log.info("[TOKEN CHECK]" + tokenRequestUrl);
+	    log.info("[CHECK ACCESS TOKEN URL] " + tokenRequestUrl);
 	    
 	    // 인증 반환 StringBuffer
 	    final StringBuffer buffer;
@@ -131,8 +132,7 @@ public class ClientTokenService {
 	    	log.info(buffer.toString());
 	      
 	    	// 결과 데이터를 JSON 으로 담기
-	    	TOKEN_INFO = new JSONObject(buffer.toString());
-	    	log.info("result after JSON parse");
+	    	tokenInfo = new JSONObject(buffer.toString());
 	    	
 
 	    } catch (JSONException e) {
@@ -141,7 +141,7 @@ public class ClientTokenService {
 			
 		}
 	    
-	    return TOKEN_INFO;
+	    return tokenInfo;
 		
 	}
 	
@@ -160,7 +160,7 @@ public class ClientTokenService {
 		final String AUTH_HOST = "http://" + CLIENT_ID + ":" + CLIENT_SECRET + "@localhost:8080";
 		final String tokenRequestUrl = AUTH_HOST + "/oauth/token";
 	    
-		log.info("[TOKEN REFRESH]" + tokenRequestUrl);
+		log.info("[REFRESH ACCESS TOKEN URL] " + tokenRequestUrl);
 		
 		// refresh_token 반환 StringBuffer
 		final StringBuffer buffer;
@@ -186,8 +186,7 @@ public class ClientTokenService {
 		    	log.info(buffer.toString());
 	  
 		    	// 결과 데이터를 JSON 으로 담기
-		    	AUTH_INFO = new JSONObject(buffer.toString());
-		    	log.info("result after JSON parse");
+		    	authInfo = new JSONObject(buffer.toString());
 
 		    } catch (JSONException e) {
 		    	
@@ -195,13 +194,43 @@ public class ClientTokenService {
 				
 			}
 		    
-		    log.info("refresh end");
-		    return AUTH_INFO;
+		    log.info("[REFRESH ACCESS TOKEN END]");
+		    return authInfo;
 			
 	    }
 	    
 	    return new JSONObject();
 	    
+	}
+	
+	/**
+	 * 사용자 Access Token Cookie 만들기
+	 * @param authInfo
+	 * @return Access Token Cookie
+	 * @throws JSONException
+	 */
+	public Cookie makeAccessTokenCookie(JSONObject authInfo) throws JSONException {
+		
+		log.info("[MAKE ACCESS TOKEN COOKIE START]");
+		
+		// Access Token 확인 가능
+		if(authInfo.has("access_token")) {
+			
+			Cookie cookie = new Cookie("access_token", authInfo.getString("access_token"));
+			cookie.setMaxAge(Integer.parseInt(authInfo.getString("expires_in")));
+			cookie.setPath("/");
+			cookie.setHttpOnly(true);
+			
+			log.info("[MAKE ACCESS TOKEN COOKIE SUCCESS]");
+			
+			return cookie;
+			
+		} else {
+		
+			log.info("[MAKE ACCESS TOKEN COOKIE ERROR]");
+			
+			return new Cookie("error", "");
+		}		
 	}
 	
 	/**
@@ -223,6 +252,7 @@ public class ClientTokenService {
 	    
 	    try {
 	    	
+	    	// POST 방식 요청
 		    if(requestType.equals("POST")) {
 		    	
 		    	// 파라미터 설정
@@ -231,10 +261,9 @@ public class ClientTokenService {
 
 		    }
 		    
+		    // GET 방식 요청
 		    if(requestType.equals("GET")) {
-		    	
 		    	response = client.execute(get);
-
 		    }
 		    
 	    	isr = new InputStreamReader(response.getEntity().getContent());
@@ -247,25 +276,23 @@ public class ClientTokenService {
 
 	    	return buffer;
 
-	    } catch (UnsupportedEncodingException e) {
+	    } catch(UnsupportedEncodingException e) {
 	      e.printStackTrace();
-	    } catch (ClientProtocolException e) {
+	    } catch(ClientProtocolException e) {
 	      e.printStackTrace();
-	    } catch (IOException e) {
+	    } catch(IOException e) {
 	      e.printStackTrace();
 	    } finally {
 	        // clear resources
 	        if (rd != null) {
 	            try {
 	                rd.close();
-	            } catch(Exception ignore) {
-	            }
+	            } catch(Exception ignore) {}
 	        }
 	        if (isr != null) {
 	            try {
 	                isr.close();
-	            } catch(Exception ignore) {
-	            }
+	            } catch(Exception ignore) {}
 	         }
 	    }
 	    

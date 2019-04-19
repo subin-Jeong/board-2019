@@ -50,9 +50,9 @@ public class BoardController {
 	 * 전체 게시글 목록 불러오기
 	 * @return 전체 게시글 목록 List
 	 */
-	@PostMapping("/getList/{pageNum}")
+	@GetMapping("/list/{pageNum}")
 	@ResponseBody 
-	public Page<Board> getList(@PageableDefault(size = 100) Pageable pageable, @PathVariable int pageNum) {
+	public Page<Board> list(@PageableDefault(size = 100) Pageable pageable, @PathVariable int pageNum) {
 		PageRequest pageRequest = new PageRequest(pageNum - 1, pageable.getPageSize());	
 		return boardRepository.findAllOrdering(pageRequest);
 	}
@@ -130,17 +130,6 @@ public class BoardController {
 		}
 		
 		return "/board/detail";
-	}
-	
-	/**
-	 * 게시글 상세 불러오기
-	 * @param bNo
-	 * @return 게시글 상세 Entity
-	 */
-	@PostMapping("/getBoard/{bNo}")
-	@ResponseBody
-	public Board getBoard(@PathVariable int bNo) {
-		return boardRepository.findOne(bNo);
 	}
 	
 	/**
