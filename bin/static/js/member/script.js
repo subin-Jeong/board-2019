@@ -98,6 +98,19 @@ $(document).ready(function() {
 	});
 	
 	// 비밀번호 확인 유효성 체크
+	$("#password").on("keyup", function () {
+		
+		if ($(this).val() != $("#passwordCheck").val()) {
+	    	$("#pwdCheck").html("<font color=red>비밀번호가 일치하지 않습니다.</font>");
+	    	setRegisterCheck("N");
+	    } else {
+	    	$("#pwdCheck").html("<font color=#4E73DF>비밀번호가 일치합니다.</font>");
+	    	setRegisterCheck("Y");
+	    }
+		
+	});
+	
+	// 비밀번호 확인 유효성 체크
 	$("#passwordCheck").on("keyup", function () {
 		
 		if ($(this).val() != $("#password").val()) {
@@ -127,7 +140,7 @@ $(document).ready(function() {
 		
 			$.ajax({
 		        type: "POST",
-		        url: "/member/getMember/",
+		        url: "/member/email/",
 		        dataType: "json",
 		        contentType: "application/json; charset=utf-8",
 		        data: JSON.stringify(data),

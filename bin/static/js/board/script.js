@@ -245,6 +245,12 @@ $(document).ready(function() {
 	$("#btn-reply-save").on("click", function () {
 		
 		var bNo = $("#no").val();
+		var content = $("#contents").val();
+		var groupNo = $("#group_no").val();
+		var groupSeq = $("#group_seq").val();
+		var parentNo = $("#parent_no").val();
+		var depth = $("#depth").val();
+		
 		
 		if(!$("#contents").val()) {
 			
@@ -256,12 +262,12 @@ $(document).ready(function() {
 		
 		var data = {
 			boardNo: bNo,
-		    content: $("#contents").val(),
+		    content: content,
 		    delFlag: "N",
-		    groupNo: ($("#group_no").val()) ? $("#group_no").val() : 0,
-			groupSeq: ($("#group_seq").val()) ? $("#group_seq").val() : 0,
-			parentNo: ($("#parent_no").val()) ? $("#parent_no").val() : 0,
-			depth: ($("#depth").val()) ? $("#depth").val() : 0
+		    groupNo: (groupNo) ? groupNo : 0,
+			groupSeq: (groupSeq) ? groupSeq : 0,
+			parentNo: (parentNo) ? parentNo : 0,
+			depth: (depth) ? depth : 0
 		};
 		
 		
@@ -294,6 +300,10 @@ $(document).ready(function() {
 		
 		var bNo = $("#no").val();
 		var rNo = $("#reply_no").val();
+		var content = $("#replyModal #reply_contents").val();
+		var groupNo = $("#group_no").val();
+		var groupSeq = $("#group_seq").val();
+		var depth = $("#depth").val();
 		
 		if(!$("#replyModal #reply_contents").val()) {
 			
@@ -305,12 +315,12 @@ $(document).ready(function() {
 		
 		var data = {
 			boardNo: bNo,
-		    content: $("#replyModal #reply_contents").val(),
+		    content: content,
 		    delFlag: "N",
-		    groupNo: ($("#group_no").val()) ? $("#group_no").val() : 0,
-			groupSeq: ($("#group_seq").val()) ? $("#group_seq").val() : 0,
+		    groupNo: (groupNo) ? groupNo : 0,
+			groupSeq: (groupSeq) ? groupSeq : 0,
 			parentNo: (rNo) ? rNo : 0,
-			depth: ($("#depth").val()) ? $("#depth").val() : 0
+			depth: (depth) ? depth : 0
 		};
 		
 		
@@ -338,18 +348,19 @@ $(document).ready(function() {
 		
 		var bNo = $("#no").val();
 		var rNo = $("#reply_no").val();
+		var content = $("#replyModifyModal #reply_contents");
 		
-		if(!$("#replyModifyModal #reply_contents").val()) {
+		if(!content.val()) {
 			
 			alert("내용을 입력하세요.");
-			$("#replyModifyModal #reply_contents").focus();
+			content.focus();
 			return false;
 			
 		}
 		
 		var data = {
 			boardNo: bNo,
-		    content: $("#replyModifyModal #reply_contents").val(),
+		    content: content.val(),
 		    delFlag: "N",
 			parentNo: (rNo) ? rNo : 0
 		};

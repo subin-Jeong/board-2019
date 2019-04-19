@@ -39,7 +39,7 @@ public class FileController {
 	private FileRepository fileRepository;
 	
 	// 업로드 경로
-	static final String uploadDir = "./src/main/resources/static/upload/";
+	static final String uploadDir = "../../upload/";
 	
 	// 업로드 개수 제한
 	static final int UPLOAD_LIMIT = 5;

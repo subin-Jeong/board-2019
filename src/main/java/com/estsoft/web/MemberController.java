@@ -1,6 +1,7 @@
 package com.estsoft.web;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.Date;
 import java.util.Map;
@@ -124,24 +125,20 @@ public class MemberController {
 	}
 	
 	/**
-	 * 회원 정보 확인
+	 * 이메일 중복확인
 	 * @param email
 	 * @return 이메일로 확인된 회원정보
 	 */
-	@GetMapping("/getMember")
+	@PostMapping("/email")
 	@ResponseBody
-	public int getMember(@RequestBody Map<String, String> data) {
+	public int checkEmail(@RequestBody Map<String, String> data) {
 		
 		String email = data.get("email");
 		
 		if(email != null && email != "") {
-			
 			return memberRepository.countByEmailIgnoreCase(email);
-		
 		} else {
-			
 			return 1;
-			
 		}
 		
 	}
