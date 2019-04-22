@@ -174,33 +174,26 @@ $(document).ready(function() {
         sServerMethod: "GET",
 		sAjaxDataProp: "",
 		columns: [
-			{ data: "filename",
+			{ data: "fileName",
 				
 				"render": function(data, type, row){
 				
 			        if(type === "display"){
 			        	
-			        	if(data.substring(0,1) === "/") {
-			        		return "<img src='/upload" + data + "'>";
-			        	} else {
-			        		return "<img src='/upload/" + data + "'>";
-			        	}
-			            
+			        	return "<img src='/upload" + data + "'>";
+			        	
 			        }
 			    }
 			
 			},
-			{ data: "filename",
+			{ data: "fileName",
 				
 				"render": function(data, type, row){
 					
 			        if(type === "display"){
 			        	
-			        	if(data.substring(0,1) === "/") {
-			        		return "<a href='/upload" + data + "' style='text-decoration:none;'>" + data.substring(data.lastIndexOf("_") + 1) + "</a>";
-			        	} else {
-			        		return "<a href='/upload/" + data + "' style='text-decoration:none;'>" + data + "</a>";
-			        	}   
+			        	return "<a href='/upload" + data + "' style='text-decoration:none;'>" + data.substring(12) + "</a>";
+			        	
 			        }
 			        
 			    }

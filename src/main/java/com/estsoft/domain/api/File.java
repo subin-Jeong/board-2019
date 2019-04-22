@@ -18,8 +18,8 @@ public class File {
     private int no;
 
     @Column(name = "FILENAME")
-    private String filename;
-
+    private String fileName;
+   
     @Column(name = "URL", length = 500)
     private String url;
     
@@ -40,14 +40,14 @@ public class File {
 		this.no = no;
 	}
 
-	public String getFilename() {
-		return filename;
+	public String getFileName() {
+		return fileName;
 	}
 
-	public void setFilename(String filename) {
-		this.filename = filename;
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
-
+	
 	public String getUrl() {
 		return url;
 	}
@@ -82,11 +82,9 @@ public class File {
 
 	@Override
 	public String toString() {
-		return "File [no=" + no + ", filename=" + filename + ", url=" + url + ", boardNo=" + boardNo + ", regDate="
+		return "File [no=" + no + ", fileName=" + fileName + ", url=" + url + ", boardNo=" + boardNo + ", regDate="
 				+ regDate + ", delFlag=" + delFlag + "]";
 	}
-
-    
 
     
 }

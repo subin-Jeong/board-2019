@@ -39,7 +39,7 @@ public class FileController {
 	private FileRepository fileRepository;
 	
 	// 업로드 경로
-	static final String uploadDir = "../../upload/";
+	static final String uploadDir = "C:/upload";
 	
 	// 업로드 개수 제한
 	static final int UPLOAD_LIMIT = 5;
@@ -79,7 +79,7 @@ public class FileController {
 	public String upload(@RequestBody Map<String, String> uploadData) {
 		
 		// 파일 업로드 확인
-		String UPLOAD_STATUS = "N";
+		String uploadStatus = "N";
 		
 		// 연관 글번호
 		int boardNo = Integer.parseInt(uploadData.get("boardNo"));
@@ -103,7 +103,7 @@ public class FileController {
             	String fileURL = uploadData.get(key);
             	
             	// 파일명
-            	String filename = "img_" + System.currentTimeMillis() + "_" + boardNo; 
+            	String fileName = "img_" + System.currentTimeMillis() + "_" + boardNo; 
             	
             	// 확장자
             	String extension = "png";
@@ -120,24 +120,27 @@ public class FileController {
             	} 
             	
             	
-            	FileUtils.fileUrlDownload(fileURL,  uploadDir + filename + "." + extension);
+            	String uploadedFileName = FileUtils.fileUrlDownload(fileURL, uploadDir, fileName + "." + extension);
             	
-            	file.setBoardNo(boardNo);
-            	file.setFilename(filename + "." + extension);
-            	file.setUrl(fileURL);
-            	file.setRegDate(date);
-            	file.setDelFlag("N");
-            	
-            	// 첨부파일 개수 제한 확인
-				if(checkFileCount(boardNo)) {
-					
-					fileRepository.save(file);
-					UPLOAD_STATUS =  "Y";
-					
-				} else {
-				
-					return "OVER";
-				}
+            	if(uploadedFileName != null) {
+            		
+                	file.setBoardNo(boardNo);
+                	file.setFileName(uploadedFileName);
+                	file.setUrl(fileURL);
+                	file.setRegDate(date);
+                	file.setDelFlag("N");
+                	
+                	// 첨부파일 개수 제한 확인
+    				if(checkFileCount(boardNo)) {
+    					
+    					fileRepository.save(file);
+    					uploadStatus =  "Y";
+    					
+    				} else {
+    				
+    					return "OVER";
+    				}
+            	}
             }
             
             if(key.indexOf("uploaded") != -1) {
@@ -145,18 +148,10 @@ public class FileController {
             	File file = new File();
             	
             	// 파일명
-            	String filename = uploadData.get(key); 
-            	
-            	// 확장자
-            	String extension = "";
-            	
-            	// 지정된 확장자가 있으면 해당 확장자로 변경
-            	if(filename.substring(filename.lastIndexOf("/")+1, filename.length()).contains(".")) {
-            		extension = filename.substring(filename.lastIndexOf(".")+1, filename.length());
-            	} 
+            	String fileName = uploadData.get(key); 
             	
             	file.setBoardNo(boardNo);
-            	file.setFilename(filename);
+            	file.setFileName(fileName);
             	file.setRegDate(date);
             	file.setDelFlag("N");
             	
@@ -164,7 +159,7 @@ public class FileController {
 				if(checkFileCount(boardNo)) {
 					
 					fileRepository.save(file);
-					UPLOAD_STATUS =  "Y";
+					uploadStatus =  "Y";
 					
 				} else {
 				
@@ -173,7 +168,7 @@ public class FileController {
             }
         }
 		
-        return UPLOAD_STATUS;
+        return uploadStatus;
 	}
 	
 	
@@ -206,7 +201,7 @@ public class FileController {
 		// 첨부파일 개수 제한
 		int fileCnt = fileRepository.countByBoardNo(boardNo);
 		
-		log.info("File Count : " + fileCnt);
+		log.info("[FILE COUNT] " + fileCnt);
 		
 		if(fileCnt < UPLOAD_LIMIT) {
 			return true;
