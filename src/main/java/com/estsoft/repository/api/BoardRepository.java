@@ -1,7 +1,10 @@
 package com.estsoft.repository.api;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,8 +19,8 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 	String delCheck = "b.delFlag='N'";
 	
 	// findAllOrdering
-	@Query("SELECT b FROM BOARD b WHERE " + delCheck + " ORDER BY b.groupNo DESC, b.groupSeq ASC, b.depth ASC")
-	Page<Board> findAllOrdering(Pageable page);
+	//@Query("SELECT b FROM BOARD b WHERE " + delCheck + " ORDER BY b.groupNo DESC, b.groupSeq ASC, b.depth ASC")
+	//Page<Board> findAllOrdering(Pageable page);
 	
 	// findOne
 	@Query("SELECT b FROM BOARD b WHERE " + delCheck +" AND b.no = :bNo")
@@ -53,6 +56,8 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 	@Transactional
 	@Query("UPDATE BOARD b SET b.groupSeq = b.groupSeq + 1 WHERE " + delCheck + " AND b.groupNo = :groupNo AND b.groupSeq >= :groupSeq")
 	int updateGroupSeq(@Param("groupNo") int groupNo, @Param("groupSeq") double groupSeq);
+
+	Page<Board> findAll(Specification<Board> specification, Pageable pageable);
 	
 	
 } 

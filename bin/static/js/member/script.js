@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
 	// 회원가입
-	$("#btn-register").on("click", function () {
+	$("#btn-register").on("click", function() {
 		
 		var email = $("#email");
 		var lastName = $("#lastName");
@@ -73,7 +73,7 @@ $(document).ready(function() {
 	});
 	
 	// 이메일 유효성 체크
-	$("#email").on("keyup", function () {
+	$("#email").on("keyup", function() {
 		
 		var regExp = /^[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[@]{1}[-A-Za-z0-9_]+[-A-Za-z0-9_.]*[.]{1}[A-Za-z]{1,5}$/;
 		
@@ -98,7 +98,7 @@ $(document).ready(function() {
 	});
 	
 	// 비밀번호 확인 유효성 체크
-	$("#password").on("keyup", function () {
+	$("#password").on("keyup", function() {
 		
 		if ($(this).val() != $("#passwordCheck").val()) {
 	    	$("#pwdCheck").html("<font color=red>비밀번호가 일치하지 않습니다.</font>");
@@ -111,7 +111,7 @@ $(document).ready(function() {
 	});
 	
 	// 비밀번호 확인 유효성 체크
-	$("#passwordCheck").on("keyup", function () {
+	$("#passwordCheck").on("keyup", function() {
 		
 		if ($(this).val() != $("#password").val()) {
 	    	$("#pwdCheck").html("<font color=red>비밀번호가 일치하지 않습니다.</font>");
@@ -125,14 +125,14 @@ $(document).ready(function() {
 	
 	
 	// 로그인
-	$("#btn-login").on("click", function () {
+	$("#btn-login").on("click", function() {
 		
 		$("#form").submit();
 		
 	});
 	
 	// 이메일 중복확인
-	$("#btn-email-check").on("click", function () {
+	$("#btn-email-check").on("click", function() {
 		
 		var data = { email: $("#email").val() };
     	

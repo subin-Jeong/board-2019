@@ -54,7 +54,7 @@ $(document).ready(function() {
 					return;
 				}
 				
-				var originFileName = data.substring(data.lastIndexOf("_") + 1);
+				var originFileName = data.substring(data.indexOf("_", 16) + 1);
 				var uploadFileInput = "<input name=\"uploaded_files\" type=\"hidden\" value=\"" + data + "\">";
 				
 				$("#uploadedList").append(originFileName + "<br />");

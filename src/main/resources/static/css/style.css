@@ -34,6 +34,27 @@ table th {
 	font-weight: bold;
 }
 
+
+.select-search {
+	color: #858796 !important;
+	height: 30px !important;
+	text-align: center !important;
+	border-color: #e3e6f0 !important;
+	border-radius: 4px !important;
+	font-weight: bold !important;
+}
+
+.input-search {
+	height: 30px !important;
+	font-size: 0.875rem !important;
+	border-color: #e3e6f0 !important;
+	border-radius: 4px !important;
+}
+
+.search-area {
+	font-size: 0.875rem !important;	
+}
+
 #uploadFiles {
 	text-align: center; 
 	display: inline-block; 
@@ -44,4 +65,3 @@ table th {
 	height: auto; 
 	padding: 10px;
 }
-

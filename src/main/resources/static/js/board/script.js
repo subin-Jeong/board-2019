@@ -7,7 +7,7 @@ $(document).ready(function() {
 	
 	
 	// 등록
-	$("#btn-save").on("click", function () {
+	$("#btn-save").on("click", function() {
 		
 		var title = $("#title").val();
 		var content = $("#contents").val();
@@ -62,7 +62,7 @@ $(document).ready(function() {
 	});
 	
 	// 수정
-	$("#btn-mod").on("click", function () {
+	$("#btn-mod").on("click", function() {
 		
 		var bNo = $("#no").val();
 		var title = $("#title").val();
@@ -107,7 +107,7 @@ $(document).ready(function() {
 	});
 	
 	// 삭제
-	$("#btn-del").on("click", function () {
+	$("#btn-del").on("click", function() {
 		
 		var bNo = $("#no").val();
 		
@@ -133,7 +133,7 @@ $(document).ready(function() {
 	
 	
 	// 취소
-	$("#btn-exit").on("click", function () {
+	$("#btn-exit").on("click", function() {
 		history.go(-1);
 	});
 	
@@ -235,7 +235,7 @@ $(document).ready(function() {
 
 	
 	// 댓글등록
-	$("#btn-reply-save").on("click", function () {
+	$("#btn-reply-save").on("click", function() {
 		
 		var bNo = $("#no").val();
 		var content = $("#contents").val();
@@ -289,7 +289,7 @@ $(document).ready(function() {
 	}
 	
 	// 댓글의 답글 등록
-	$("#btn-reply-reply-save").on("click", function () {
+	$("#btn-reply-reply-save").on("click", function() {
 		
 		var bNo = $("#no").val();
 		var rNo = $("#reply_no").val();
@@ -337,7 +337,7 @@ $(document).ready(function() {
 	});
 	
 	// 댓글수정
-	$("#btn-reply-mod").on("click", function () {
+	$("#btn-reply-mod").on("click", function() {
 		
 		var bNo = $("#no").val();
 		var rNo = $("#reply_no").val();
@@ -383,6 +383,39 @@ $(document).ready(function() {
 	
 	    });
 		    
+	});
+	
+	
+	// 검색
+	$("#searchString").keydown(function(key) {
+		
+		// 엔터 입력 시 실행
+		if(key.keyCode == 13){
+		
+			var searchType = $("#searchType").val();
+			var searchString = $("#searchString").val();
+			
+			if(!searchType) {
+				location.href = "/board/list";
+				return;
+			}
+			
+			if(!searchString) {
+				alert("검색어를 입력하세요.");
+				return false;
+			}
+			
+			getBoardList(1);
+		}
+		
+	});
+	
+	
+	// 페이징 크기 변환
+	$("#pageSize").change(function() {
+		
+		getBoardList(1);
+		
 	});
 	
 	
@@ -478,17 +511,30 @@ function deleteFile(fNo) {
 // 게시글 가져오기
 function getBoardList(page) {
 	
+	var url = "/board/list/" + page;
+	
+	// 검색 파라미터 추가
+	var searchType = $("#searchType").val();
+	var searchString = $("#searchString").val();
+	var reqPageSize = $("#pageSize").val();
+	
+	var data = {
+			searchType : searchType,
+			searchString : searchString,
+			reqPageSize : reqPageSize
+	};
+	
+	url+= "?" + $.param(data);
+	
 	$.ajax({
 	    type: "GET",
-	    url: "/board/list/" + page,
-	    dataType: "json",
-	    contentType: "application/json; charset=utf-8",
+	    url: url,
 	    success:function(result){   
 	    	
 	    	// 페이지 정보
 	    	$("#pageNum").val(page);
 
-	    	$("#boardListPaginationInfo").text("총 " + Number(result["totalElements"]).format() + " 건");
+	    	$("#boardListPaginationInfo").html("총 <b>" + Number(result["totalElements"]).format() + "</b> 건");
 	    	
 	    	// 페이징 버튼
 	    	drawPagination("board", result["totalPages"]);
@@ -506,6 +552,10 @@ function getBoardList(page) {
 // 글 리스트
 function drawList(listObj) {
 
+	// 회원정보
+	var memberList = getMemberList();
+	
+	// 게시판 리스트 HTML
 	var listHTML = "";
 
 	for(i=0; i<listObj.length; i++) {
@@ -540,6 +590,10 @@ function drawList(listObj) {
 			
 		}	
 		
+		// writer
+		var writer = "";
+		writer = (typeof(memberList[list["writer"]]) != "undefined") ? memberList[list["writer"]] : list["writer"];
+		
 		// list
         listHTML+= "<tr role='row' class='odd'>";
 		listHTML+= "	<td class='dt-body-center'>" + list["no"] + "</td>";
@@ -547,7 +601,7 @@ function drawList(listObj) {
 		listHTML+= 		titleHTML;
 		listHTML+= "	</td>";
 		listHTML+= "	<td class='dt-body-center'>" + regDate + "</td>";
-		listHTML+= "	<td class='dt-body-center'>" + list["writer"] + "</td>";
+		listHTML+= "	<td class='dt-body-center' title='" + list["writer"] + "'>" + writer + "</td>";
 		listHTML+= "</tr>";
 		
 	}
@@ -569,7 +623,7 @@ function getReplyList(page) {
 	    	// 페이지 정보
 	    	$("#pageNum").val(page);
 
-	    	$("#replyListPaginationInfo").text("총 " + Number(result["totalElements"]).format() + " 건");
+	    	$("#replyListPaginationInfo").html("총 <b>" + Number(result["totalElements"]).format() + "</b> 건");
 	    	
 	    	// 페이징 버튼
 	    	drawPagination("reply", result["totalPages"]);
@@ -587,6 +641,10 @@ function getReplyList(page) {
 // 댓글 리스트
 function drawReplyList(listObj) {
 
+	// 회원정보
+	var memberList = getMemberList();
+	
+	// 댓글 리스트 HTML
 	var listHTML = "";
 
 	for(i=0; i<listObj.length; i++) {
@@ -621,6 +679,10 @@ function drawReplyList(listObj) {
 			
 		}	
 		
+		// writer
+		var writer = "";
+		writer = (typeof(memberList[list["writer"]]) != "undefined") ? memberList[list["writer"]] : list["writer"];
+		
 		// 답글, 수정, 삭제 버튼
 		btnStr = "<a href='#' onclick='setReplyNo(" + list["no"] + ")' class='btn btn-success btn-icon-split' data-toggle='modal' data-target='#replyModal'>";
 		btnStr+= "<span class='text'>답글</span>";
@@ -636,7 +698,7 @@ function drawReplyList(listObj) {
         listHTML+= "<tr role='row' class='odd'>";
 		listHTML+= "	<td class='dt-body-left'>" + titleHTML + "</td>";
 		listHTML+= "	<td class='dt-body-center'>" + regDate + "</td>";
-		listHTML+= "	<td class='dt-body-center'>" + list["writer"] + "</td>";
+		listHTML+= "	<td class='dt-body-center' title='" + list["writer"] + "'>" + writer + "</td>";
 		listHTML+= "	<td class='dt-body-center'>" + btnStr + "</td>";
 		listHTML+= "</tr>";
 		
@@ -660,32 +722,44 @@ function drawPagination(type, totalPages) {
 		
 	}
 	
+	// 페이지
 	var pageNum = ($("#pageNum").val() > 0) ? $("#pageNum").val() : 1;
-		
+	
 	$(targetObj).bootpag({
 		
 		total: totalPages,
-     page: pageNum,
-     maxVisible: (type === "reply") ? 5 : 10,
-     leaps: true,
-     firstLastUse: true,
-     first: "처음",
-     last: "끝",
-     next: "다음",
-     prev: "이전",
-     wrapClass: "pagination",
-     activeClass: "active",
-     disabledClass: "disabled",
-     nextClass: "next",
-     prevClass: "prev",
-     lastClass: "last",
-     firstClass: "first"
+		page: pageNum,
+		maxVisible: (type === "reply") ? 5 : 10,
+		leaps: true,
+		firstLastUse: true,
+		first: "처음",
+		last: "끝",
+		next: "다음",
+		prev: "이전",
+		wrapClass: "pagination",
+		activeClass: "active",
+		disabledClass: "disabled",
+		nextClass: "next",
+		prevClass: "prev",
+		lastClass: "last",
+		firstClass: "first"
      	
 	}).on("page", function(event, num){
 
+		// 검색 파라미터 추가
+		var searchType = $("#searchType").val();
+		var searchString = $("#searchString").val();
+		var reqPageSize = $("#pageSize").val();
+		
+		var data = {
+				searchType : searchType,
+				searchString : searchString,
+				reqPageSize : reqPageSize
+		};
+		
 		$.ajax({
 		    type: "GET",
-		    url: targetUrl + "/" + num,
+		    url: targetUrl + "/" + num + "?" + $.param(data),
 		    dataType: "json",
 		    contentType: "application/json; charset=utf-8",
 		    success:function(result){   
@@ -712,5 +786,33 @@ function drawPagination(type, totalPages) {
      
  });
 
+}
+
+// 회원정보
+function getMemberList() {
+	
+	var memberList = new Array();
+
+	// 회원정보
+	$.ajax({
+	    type: "GET",
+	    url: "/member/list",
+	    dataType: "json",
+	    contentType: "application/json; charset=utf-8",
+	    async: false,
+	    success:function(result){   
+	    	
+	    	// key : email, value : name
+	    	for(i=0; i<result.length; i++) {
+	    		memberList[result[i].email] = result[i].name;
+	    	}
+	    	
+	    }, 
+	    error:function(e){  
+	    } 
+
+	});
+	
+	return memberList;
 	
 }

@@ -102,7 +102,7 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
     	JdbcClientDetailsService jdbcClientDetailsService = new JdbcClientDetailsService(dataSource);
         clients.withClientDetails(jdbcClientDetailsService);
         
-        log.info("[OAuth2 Client List] " + jdbcClientDetailsService.listClientDetails().toString());
+        log.info("[OAUTH2 CLIENT LIST] " + jdbcClientDetailsService.listClientDetails().toString());
     }
 
     

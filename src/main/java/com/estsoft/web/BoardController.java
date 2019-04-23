@@ -1,7 +1,14 @@
 package com.estsoft.web;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +31,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.estsoft.auth.SecurityConfig;
 import com.estsoft.domain.api.Board;
 import com.estsoft.repository.api.BoardRepository;
+import com.estsoft.repository.api.MemberRepository;
 
 @Controller
 @RequestMapping("/board")
@@ -37,9 +50,13 @@ public class BoardController {
 	@Autowired
 	private BoardRepository boardRepository;
 	
+	@Autowired
+	private MemberRepository memberRepository;
+	
+	
 	/**
-	 * ÀüÃ¼ °Ô½Ã±Û ¸ñ·Ï
-	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
+	 * ì „ì²´ ê²Œì‹œê¸€ ëª©ë¡
+	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
 	 */
 	@GetMapping("/list")
 	public String list() {
@@ -47,19 +64,74 @@ public class BoardController {
 	}
 	
 	/**
-	 * ÀüÃ¼ °Ô½Ã±Û ¸ñ·Ï ºÒ·¯¿À±â
-	 * @return ÀüÃ¼ °Ô½Ã±Û ¸ñ·Ï List
+	 * ì „ì²´ ê²Œì‹œê¸€ ëª©ë¡ ë¶ˆëŸ¬ì˜¤ê¸°
+	 * @return ì „ì²´ ê²Œì‹œê¸€ ëª©ë¡ List
 	 */
 	@GetMapping("/list/{pageNum}")
 	@ResponseBody 
-	public Page<Board> list(@PageableDefault(size = 100) Pageable pageable, @PathVariable int pageNum) {
-		PageRequest pageRequest = new PageRequest(pageNum - 1, pageable.getPageSize());	
-		return boardRepository.findAllOrdering(pageRequest);
+	public Page<Board> list(
+			@PageableDefault(size = 100) Pageable pageable, 
+			@PathVariable int pageNum, 
+			@RequestParam(value = "searchType", required = false) String searchType, 
+			@RequestParam(value = "searchString", required = false) String searchString,
+			@RequestParam(value = "reqPageSize", required = false) String reqPageSize) {
+		
+		// ì •ë ¬
+		Sort sort = new Sort(new Order(Direction.DESC, "groupNo"), new Order(Direction.ASC, "groupSeq"), new Order(Direction.ASC, "depth"));
+		
+		// í˜ì´ì§€ í¬ê¸° ë³€ê²½
+		int pageSize = pageable.getPageSize();
+		if(reqPageSize != null && !reqPageSize.equals("")) {
+			pageSize = Integer.parseInt(reqPageSize);
+		}
+		
+		// í˜ì´ì§• ì„¤ì •
+		PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
+		
+		// ê¸€ëª©ë¡ ê°€ì ¸ì˜¤ê¸°
+		return boardRepository.findAll(new Specification<Board>() {
+
+			@Override
+			public Predicate toPredicate(Root<Board> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+				
+				List<Predicate> predicates = new ArrayList<>();
+				
+				// ê²€ìƒ‰ ì»¬ëŸ¼ì— ë”°ë¼ ê²€ìƒ‰ë°©ì‹ì„ ë³€ê²½
+				if(searchType != null && !searchType.equals("")) {
+					
+					// del_flag = 'N'
+					predicates.add(cb.and(cb.equal(root.get("delFlag"), "N")));
+					
+					switch(searchType) {
+					
+						// ì œëª©ì˜ ê²½ìš° LIKE ë¹„êµ
+						case "title" :
+							predicates.add(cb.like(root.get(searchType), "%" + searchString + "%"));
+							break;
+							
+						// ë‚´ìš©ì˜ ê²½ìš° LIKE ë¹„êµ
+						case "content" :
+							predicates.add(cb.like(root.get(searchType), "%" + searchString + "%"));
+							break;
+							
+						default : 
+							predicates.add(cb.and(cb.equal(root.get(searchType), searchString)));
+							break;
+					}
+				}
+				return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+			
+		}, pageRequest);
+		
+		//PageRequest pageRequest = new PageRequest(pageNum - 1, pageable.getPageSize());
+		//return boardRepository.findAllOrdering(pageRequest);
+		
 	}
 	
 	/**
-	 * °Ô½Ã±Û µî·Ï ÆäÀÌÁö
-	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
+	 * ê²Œì‹œê¸€ ë“±ë¡ í˜ì´ì§€
+	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
 	 */
 	@GetMapping("/write")
 	public String write() {
@@ -67,9 +139,9 @@ public class BoardController {
 	}
 	
 	/**
-	 * °Ô½Ã±Û µî·Ï
+	 * ê²Œì‹œê¸€ ë“±ë¡
 	 * @param board
-	 * @return µî·ÏµÈ °Ô½Ã±Û Entity
+	 * @return ë“±ë¡ëœ ê²Œì‹œê¸€ Entity
 	 */
 	@PostMapping("/save")
 	@ResponseBody 
@@ -79,16 +151,16 @@ public class BoardController {
 		
 		if(writer != null) {
 			
-			// ÇöÀç ·Î±×ÀÎÇÑ »ç¿ëÀÚ
+			// í˜„ì¬ ë¡œê·¸ì¸í•œ ì‚¬ìš©ì
 			board.setWriter(writer);
 			
-			// µî·ÏÀÏÀÚ¸¦ ¿À´Ã·Î ¼³Á¤
+			// ë“±ë¡ì¼ìë¥¼ ì˜¤ëŠ˜ë¡œ ì„¤ì •
 			board.setRegDate(new Date());
 			
-			// °Ô½Ã±Û ÀúÀå
+			// ê²Œì‹œê¸€ ì €ì¥
 			Board saveBoard = boardRepository.save(board);
 			
-			// »ı¼ºµÈ bNo·Î groupNo ¼³Á¤
+			// ìƒì„±ëœ bNoë¡œ groupNo ì„¤ì •
 			saveBoard.setGroupNo(saveBoard.getNo());
 			
 			return boardRepository.save(saveBoard);
@@ -100,28 +172,35 @@ public class BoardController {
 	}
 	
 	/**
-	 * °Ô½Ã±Û »ó¼¼ ÆäÀÌÁö
+	 * ê²Œì‹œê¸€ ìƒì„¸ í˜ì´ì§€
 	 * @param bNo
 	 * @param model
-	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
+	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
 	 */
 	@GetMapping("/detail/{bNo}")
 	public String detail(@PathVariable int bNo, Model model, Principal principal) {
 		
 		Board board = boardRepository.findOne(bNo);
 		
-		// Á¸ÀçÇÏÁö ¾Ê´Â °Ô½Ã±Û (»èÁ¦ °Ô½Ã±Û Æ÷ÇÔ) Á¢±ÙÇÏ´Â °æ¿ì
+		// ì¡´ì¬í•˜ì§€ ì•ŠëŠ” ê²Œì‹œê¸€ (ì‚­ì œ ê²Œì‹œê¸€ í¬í•¨) ì ‘ê·¼í•˜ëŠ” ê²½ìš°
 		if(board == null) {
 			
 			return "/board/404";
 			
 		}
 		
+		// ì‘ì„±ì ì´ë¦„ìœ¼ë¡œ ë³€ê²½
+		String writerName = memberRepository.findNameByEmail(board.getWriter());
+		if(writerName == null) { 
+			writerName = board.getWriter();
+		}
+		
 		model.addAttribute("board", board);
 		model.addAttribute("formattedRegDate", board.getFormattedRegDate());
 		model.addAttribute("formattedModifyDate", board.getFormattedModifyDate());
+		model.addAttribute("writerName", writerName);
 		
-		// ÀÛ¼ºÀÚ È®ÀÎ
+		// ì‘ì„±ì í™•ì¸
 		String userInfo = principal.getName();		
 		if(userInfo != null && board.getWriter().equals(userInfo)) {
 
@@ -133,10 +212,10 @@ public class BoardController {
 	}
 	
 	/**
-	 * °Ô½Ã±Û ¼öÁ¤ ÆäÀÌÁö  
+	 * ê²Œì‹œê¸€ ìˆ˜ì • í˜ì´ì§€  
 	 * @param bNo
 	 * @param model
-	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
+	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
 	 */
 	@GetMapping("/modify/{bNo}")
 	public String modify(@PathVariable int bNo, Model model) {
@@ -147,10 +226,10 @@ public class BoardController {
 	}
 	
 	/**
-	 * °Ô½Ã±Û ¼öÁ¤
+	 * ê²Œì‹œê¸€ ìˆ˜ì •
 	 * @param bNo
 	 * @param board
-	 * @return ¼öÁ¤µÈ °Ô½Ã±Û Entity
+	 * @return ìˆ˜ì •ëœ ê²Œì‹œê¸€ Entity
 	 */
 	@PutMapping("/update/{bNo}")
 	@ResponseBody
@@ -159,15 +238,15 @@ public class BoardController {
 		String userInfo = principal.getName();
 		Board updateBoard = boardRepository.findOne(bNo);
 
-		// ÀÛ¼ºÀÚ¸¸ ¼öÁ¤ °¡´É
+		// ì‘ì„±ìë§Œ ìˆ˜ì • ê°€ëŠ¥
 		if(userInfo != null && updateBoard.getWriter().equals(userInfo)) {
 			
-			// ¼öÁ¤ ½Ã Á¦¸ñ, ³»¿ë ÀÌ¿Ü ±âÁ¸ »çÇ× ¹İ¿µ
+			// ìˆ˜ì • ì‹œ ì œëª©, ë‚´ìš© ì´ì™¸ ê¸°ì¡´ ì‚¬í•­ ë°˜ì˜
 			updateBoard.setNo(bNo);
 			updateBoard.setTitle(board.getTitle());
 			updateBoard.setContent(board.getContent());
 			
-			// ¼öÁ¤ÀÏÀÚ¸¦ ¿À´Ã·Î ÁöÁ¤
+			// ìˆ˜ì •ì¼ìë¥¼ ì˜¤ëŠ˜ë¡œ ì§€ì •
 			updateBoard.setModifyDate(new Date());
 			
 			return boardRepository.save(updateBoard);
@@ -182,9 +261,9 @@ public class BoardController {
 	}
 	
 	/**
-	 * °Ô½Ã±Û »èÁ¦
+	 * ê²Œì‹œê¸€ ì‚­ì œ
 	 * @param bNo
-	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
+	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
 	 */
 	@DeleteMapping("/delete/{bNo}")
 	@ResponseBody
@@ -192,10 +271,10 @@ public class BoardController {
 		
 		String userInfo = principal.getName();
 		
-		// ±âÁ¸ µ¥ÀÌÅÍ´Â À¯ÁöÇÏµÇ, delFlag = 'Y' ¾÷µ¥ÀÌÆ®
+		// ê¸°ì¡´ ë°ì´í„°ëŠ” ìœ ì§€í•˜ë˜, delFlag = 'Y' ì—…ë°ì´íŠ¸
 		Board board = boardRepository.findOne(bNo);
 		
-		// ÀÛ¼ºÀÚ¸¸ »èÁ¦ °¡´É
+		// ì‘ì„±ìë§Œ ì‚­ì œ ê°€ëŠ¥
 		if(userInfo != null && board.getWriter().equals(userInfo)) {
 
 			board.setDelFlag("Y");
@@ -211,16 +290,16 @@ public class BoardController {
 	}	
 	
 	/**
-	 * ´ä±Û µî·Ï ÆäÀÌÁö
+	 * ë‹µê¸€ ë“±ë¡ í˜ì´ì§€
 	 * @param bNo
 	 * @param model
-	 * @return ¸®´ÙÀÌ·ºÆ® µÉ ºä ÆäÀÌÁö
+	 * @return ë¦¬ë‹¤ì´ë ‰íŠ¸ ë  ë·° í˜ì´ì§€
 	 */
 	@GetMapping("/write/{bNo}")
 	public String writeReply(@PathVariable int bNo, Model model) {
 		
-		// ´ä±ÛÀÇ ´ä±ÛÀÎ °æ¿ì
-		// groupNo°¡ ÀÖ´ÂÁö È®ÀÎ
+		// ë‹µê¸€ì˜ ë‹µê¸€ì¸ ê²½ìš°
+		// groupNoê°€ ìˆëŠ”ì§€ í™•ì¸
 		int groupNo = boardRepository.findGroupNoBybNo(bNo);
 		
 		model.addAttribute("groupNo", groupNo);
@@ -230,9 +309,9 @@ public class BoardController {
 	}
 	
 	/**
-	 * ´ä±Û µî·Ï
+	 * ë‹µê¸€ ë“±ë¡
 	 * @param board
-	 * @return µî·ÏµÈ ´ä±Û Entity
+	 * @return ë“±ë¡ëœ ë‹µê¸€ Entity
 	 */
 	@PostMapping("/saveReply")
 	@ResponseBody 
@@ -242,34 +321,34 @@ public class BoardController {
 		
 		if(writer != null) {
 
-			// ¿ø±Û ¹øÈ£·Î groupSeq, parentNo, depth ÁöÁ¤
+			// ì›ê¸€ ë²ˆí˜¸ë¡œ groupSeq, parentNo, depth ì§€ì •
 			int groupNo = board.getGroupNo();
 			int parentNo = board.getParentNo();
 			
-			// ¿ø±ÛÀÇ ´ä±ÛÀÎ °æ¿ì
+			// ì›ê¸€ì˜ ë‹µê¸€ì¸ ê²½ìš°
 			if(parentNo == 0) {
 				parentNo = groupNo;
 			}
 			
-			// ÇÊ¿ä ÆÄ¶ó¹ÌÅÍ
-			// groupSeq : ¿ø±Û Æ÷ÇÔ ÀüÃ¼ ¼ø¼­ ÁöÁ¤
-			// parentNo : ºÎ¸ğ ±Û
-			// depth : ¿ø±Û·ÎºÎÅÍ ¸î¹øÂ° °èÃşÀÎÁö
+			// í•„ìš” íŒŒë¼ë¯¸í„°
+			// groupSeq : ì›ê¸€ í¬í•¨ ì „ì²´ ìˆœì„œ ì§€ì •
+			// parentNo : ë¶€ëª¨ ê¸€
+			// depth : ì›ê¸€ë¡œë¶€í„° ëª‡ë²ˆì§¸ ê³„ì¸µì¸ì§€
 			
-			// ºÎ¸ğ ±ÛÀÇ depth
+			// ë¶€ëª¨ ê¸€ì˜ depth
 			int preDepth = boardRepository.findDepthByParentNo(parentNo);
 			
-			// ÇöÀç ±Û ±×·ì ³»ÀÇ ¸¶Áö¸· groupSeq
+			// í˜„ì¬ ê¸€ ê·¸ë£¹ ë‚´ì˜ ë§ˆì§€ë§‰ groupSeq
 			double maxGroupSeq = boardRepository.findMinGroupSeqByParentNoAndGroupNo(parentNo, groupNo);
 			
-			// ÀÌÀü ±ÛÀÇ groupSeq
+			// ì´ì „ ê¸€ì˜ groupSeq
 			double preGroupSeq = boardRepository.findGroupSeqByGroupNoAndGroupSeq(groupNo, maxGroupSeq);
 			
-			// ÇöÀç ´ä±Û ÀÌÈÄ ±ÛÀÌ ÀÖ´Â °æ¿ì
+			// í˜„ì¬ ë‹µê¸€ ì´í›„ ê¸€ì´ ìˆëŠ” ê²½ìš°
 			if(maxGroupSeq > 0) {
 			
-				// groupSeqNew = ÀÌÀü ±ÛÀÇ groupSeq + ÀÌÈÄ ±ÛÀÇ groupSeq / 2
-				// groupSeqNew °¡ ¼Ò¼öÁ¡ ¾Æ·¡ 15ÀÚ¸® ÀÌ»óÀÎ °æ¿ì ÀÌÈÄ groupSeq + 1 ÀüÃ¼ ¾÷µ¥ÀÌÆ®
+				// groupSeqNew = ì´ì „ ê¸€ì˜ groupSeq + ì´í›„ ê¸€ì˜ groupSeq / 2
+				// groupSeqNew ê°€ ì†Œìˆ˜ì  ì•„ë˜ 15ìë¦¬ ì´ìƒì¸ ê²½ìš° ì´í›„ groupSeq + 1 ì „ì²´ ì—…ë°ì´íŠ¸
 				double groupSeqNew = (preGroupSeq + maxGroupSeq) / 2;
 				String groupSeqNewStr = groupSeqNew + "";
 				
@@ -278,16 +357,16 @@ public class BoardController {
 				log.info("double : " + groupSeqNew);
 				log.info("String : " + groupSeqNewStr);
 				
-				// ¼Ò¼öÁ¡ ÀÚ¸®¼ö È®ÀÎ
+				// ì†Œìˆ˜ì  ìë¦¬ìˆ˜ í™•ì¸
 				int lenCheck = groupSeqNewStr.length() - groupSeqNewStr.indexOf(".") - 1;
-				log.info("¼Ò¼öÁ¡ ÀÚ¸®¼ö : " + lenCheck);
+				log.info("ì†Œìˆ˜ì  ìë¦¬ìˆ˜ : " + lenCheck);
 				if(lenCheck <= 15) {
 					
 					board.setGroupSeq(groupSeqNew);
 					
 				} else {
 					
-					// ±âÁ¸ groupSeq ¸¦ µÚ·Î ¹Ğ±â
+					// ê¸°ì¡´ groupSeq ë¥¼ ë’¤ë¡œ ë°€ê¸°
 					boardRepository.updateGroupSeq(groupNo, maxGroupSeq);
 								
 					board.setGroupSeq(maxGroupSeq);
@@ -304,7 +383,7 @@ public class BoardController {
 			board.setWriter(writer);
 			board.setDepth(preDepth + 1);
 			
-			// µî·ÏÀÏÀÚ¸¦ ¿À´Ã·Î ¼³Á¤
+			// ë“±ë¡ì¼ìë¥¼ ì˜¤ëŠ˜ë¡œ ì„¤ì •
 			board.setRegDate(new Date());
 			
 			return boardRepository.save(board);

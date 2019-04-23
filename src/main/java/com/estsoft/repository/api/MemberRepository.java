@@ -1,6 +1,7 @@
 package com.estsoft.repository.api;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -31,7 +32,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	int updateRefreshTokenByEmail(@Param("email") String email, @Param("refreshToken") String refreshToken);
 	
 	// findAllEmailAndName
-	@Query("SELECT email, name FROM MEMBER")
-	List<Member> findAllEmailAndName();
+	@Query("SELECT m.email AS email, m.name AS name FROM MEMBER m")
+	List<Map<String, String>> findAllEmailAndName();
 
 }

@@ -43,7 +43,7 @@ public class WebInterceptor implements HandlerInterceptor {
 	// 로그인한 회원 정보
 	private CustomUserDetails principal;
 	
-		
+	
 	/**
 	 * 게시판 서비스 이용 시 모든 요청에 대해 Access Token 확인
 	 * @return 토큰 확인 결과
@@ -143,11 +143,20 @@ public class WebInterceptor implements HandlerInterceptor {
 					memberRepository.updateRefreshTokenByEmail(email, authInfo.getString("refresh_token"));
 				}
 				
+
+				log.info("[REQUEST METHOD] " + request.getMethod());
+				log.info("[REQUEST PATH] " + request.getRequestURI());
+				
 				// 사용자에게 알림
-				response.setContentType("text/html; charset=UTF-8");
-				PrintWriter out = response.getWriter();
-				out.println("<script> alert('인증 시간이 만료되어 자동 시간 연장 되었습니다.'); </script>");
-				out.flush();
+				// 페이지 전환 시에만 알림창이 뜨도록 설정
+				if(request.getMethod().equals("GET") && !request.getRequestURI().contains("/list/")) {
+					
+					response.setContentType("text/html; charset=UTF-8");
+					PrintWriter out = response.getWriter();
+					out.println("<script> alert('인증 시간이 만료되어 자동 시간 연장 되었습니다.'); </script>");
+					out.flush();
+					
+				}
 				
 			} else {
 				log.info("[REFRESH ACCESS TOKEN][FAIL]");
@@ -158,6 +167,7 @@ public class WebInterceptor implements HandlerInterceptor {
 		// 토큰 확인 정상적으로 완료
 		if(tokenInfo != null) {
 			if(tokenInfo.has("user_name") && tokenInfo.has("exp")) {
+				
 				principal.setExpireTime(Long.parseLong(tokenInfo.getString("exp")));
 				
 				// 정상 로그인
@@ -175,14 +185,23 @@ public class WebInterceptor implements HandlerInterceptor {
 			memberRepository.updateRefreshTokenByEmail(email, null);
 		}
 		
+		
+		log.info("[REQUEST METHOD] " + request.getMethod());
+		log.info("[REQUEST PATH] " + request.getRequestURI());
+		
 		// 사용자에게 알림
-		response.setContentType("text/html; charset=UTF-8");
-		PrintWriter out = response.getWriter();
-		out.println("<script> "
-				  + "	alert('인증 시간이 만료되었습니다. 재로그인 하시기 바랍니다.'); "
-				  + "	location.href = '/member/login'; "
-				  + "</script>");
-		out.flush();
+		// 페이지 전환 시에만 알림창이 뜨도록 설정
+		if(request.getMethod().equals("GET") && !request.getRequestURI().contains("/list/")) {
+			
+			response.setContentType("text/html; charset=UTF-8");
+			PrintWriter out = response.getWriter();
+			out.println("<script> "
+					  + "	alert('인증 시간이 만료되었습니다. 재로그인 하시기 바랍니다.'); "
+					  + "	location.href = '/member/login'; "
+					  + "</script>");
+			out.flush();
+			
+		}
 		
 		return true;
 	

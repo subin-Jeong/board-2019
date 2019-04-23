@@ -1,9 +1,9 @@
 package com.estsoft.web;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -145,6 +145,17 @@ public class MemberController {
 	
 	
 	/**
+	 * 회원 이메일, 이름 정보 가져오기
+	 * @return Map<이메일, 이름>
+	 */
+	@GetMapping("/list")
+	@ResponseBody
+	public List<Map<String, String>> list() {
+		return memberRepository.findAllEmailAndName();
+	}
+	
+	
+	/**
 	 * 수동 Access Token 갱신 (refresh_token 이용)
 	 * @param principal
 	 * @return
@@ -178,9 +189,7 @@ public class MemberController {
 				}
 				
 				// 새로운 쿠키 발급
-				Cookie addCookie = new Cookie("access_token", authInfo.getString("access_token"));
-				addCookie.setPath("/");
-				addCookie.setHttpOnly(true);
+				Cookie addCookie = clientTokenService.makeAccessTokenCookie(authInfo);
 				response.addCookie(addCookie);
 				
 				// 추후 access_token 재발급을 위해 refresh_token 저장
@@ -195,19 +204,15 @@ public class MemberController {
 				return HttpStatus.OK.toString();
 				
 			} else if(authInfo.has("error")) {
-				
 				if(authInfo.getString("error_description").contains("expired")) {
 					
 					// refresh_token 만료, access_token 재발급 불가
 					return HttpStatus.NO_CONTENT.toString();
 					
-				} 
-				
+				}
 			}
-			
 			return HttpStatus.BAD_REQUEST.toString();
 		}
-		
 		return HttpStatus.UNAUTHORIZED.toString();
 	}
 	

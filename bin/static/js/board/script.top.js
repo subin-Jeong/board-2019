@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	
 	// access_token 갱신
-	$("#btn-refresh").on("click", function () {
+	$("#btn-refresh").on("click", function() {
 		
 	    $.ajax({
 	        type: "POST",
@@ -37,7 +37,7 @@ $(document).ready(function() {
 	});
 	
 	// 로그아웃
-	$("#btn-logout").on("click", function () {
+	$("#btn-logout").on("click", function() {
 		
 		if(confirm("로그아웃 하시겠습니까?")) {
 			

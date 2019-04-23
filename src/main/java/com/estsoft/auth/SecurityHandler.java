@@ -35,17 +35,18 @@ public class SecurityHandler implements AuthenticationSuccessHandler, Authentica
 	@Autowired
 	private MemberRepository memberRepository;
 	
-	// 인증 결과 정보
-	private JSONObject authInfo;
-	
-	// 로그인된 사용자 정보
-	private final Map<String, String> loginInfo = new HashMap<String, String>();
-	
 	
 	// 로그인 성공 Handler
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
+		// 인증 결과 정보
+		JSONObject authInfo;
+		
+		// 로그인된 사용자 정보
+		final Map<String, String> loginInfo = new HashMap<String, String>();
+		
+		
 		// Oauth2 를 통한 Access Token 획득
 		loginInfo.put("username", request.getParameter("username"));
 		loginInfo.put("password", request.getParameter("password"));
