@@ -42,6 +42,8 @@ import com.estsoft.domain.api.Board;
 import com.estsoft.repository.api.BoardRepository;
 import com.estsoft.repository.api.MemberRepository;
 
+import antlr.StringUtils;
+
 @Controller
 @RequestMapping("/board")
 @Transactional
@@ -101,11 +103,11 @@ public class BoardController {
 				
 				List<Predicate> predicates = new ArrayList<>();
 				
+				// del_flag = 'N'
+				predicates.add(cb.and(cb.equal(root.get("delFlag"), "N")));
+				
 				// 검색 컬럼에 따라 검색방식을 변경
 				if(searchType != null && !searchType.equals("")) {
-					
-					// del_flag = 'N'
-					predicates.add(cb.and(cb.equal(root.get("delFlag"), "N")));
 					
 					switch(searchType) {
 					
@@ -149,9 +151,6 @@ public class BoardController {
 			}
 			
 		}, pageRequest);
-		
-		//PageRequest pageRequest = new PageRequest(pageNum - 1, pageable.getPageSize());
-		//return boardRepository.findAllOrdering(pageRequest);
 		
 	}
 	

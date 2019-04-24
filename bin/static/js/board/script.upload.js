@@ -18,12 +18,18 @@ $(document).ready(function() {
 		// 기본 효과 방지
 		event.preventDefault();
 		
+		// 객체 드래그 확인
+		$(this).css("border", "2px solid #99BBF4");
+		
 	});
 	
 	$("#fileDrop").on("drop", function(event) {
 		
 		// 기본 효과 방지
 		event.preventDefault();
+		
+		// 객체 드래그 확인 시 border 제거
+		$(this).css("border", "");
 		
 		// 드래그된 파일 정보
 		var files = event.originalEvent.dataTransfer.files;
@@ -57,7 +63,13 @@ $(document).ready(function() {
 				var originFileName = data.substring(data.indexOf("_", 16) + 1);
 				var uploadFileInput = "<input name=\"uploaded_files\" type=\"hidden\" value=\"" + data + "\">";
 				
-				$("#uploadedList").append(originFileName + "<br />");
+				var uploadedListTable = "";
+				uploadedListTable+= "<tr>";
+				uploadedListTable+= "<td>" + originFileName + "</td>";
+				uploadedListTable+= "<td onclick=\"deleteUploadedFile(this, '" + data + "');\"><b>X</b></td>";
+				uploadedListTable+= "</tr>";
+					
+				$("#uploadedListTable:last").append(uploadedListTable);
 				$("#uploadedList").append(uploadFileInput);
 				
 			}
@@ -126,3 +138,14 @@ function saveFile(bNo) {
 	}
 }
 
+
+// 첨부파일 등록 취소
+function deleteUploadedFile(obj, fileName) {
+	
+	// input 삭제
+	$("input[value='" + fileName + "']").remove();
+	
+	// 파일명 보이는 부분 삭제
+	obj.closest("tr").remove();
+	
+}

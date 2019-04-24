@@ -1,4 +1,4 @@
- {{> board/include/top}}
+{{> board/include/top}}
 <body id="page-top">
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -36,15 +36,23 @@
 								</table>
 								<!-- 이미지 -->
 								<div contenteditable="true" id="uploadFiles" class="font-size-smid">
-								 이미지 붙여넣기
+									 이미지 붙여넣기
 								</div>
 								<div class="card mb-4" style="margin-top:5px;">
 									<!-- 파일 drag & drop -->
 									<div id="fileDrop" class="card-header fileDrop font-size-smid" style="height:100px; line-height:70px; text-align:center;">
-									파일 드래그 앤 드롭
+										 파일 드래그 앤 드롭
 									</div>
 									<!-- 업로드된 파일 목록 -->
 									<div class="card-body uploadedList" id="uploadedList">
+										<table width="100%" cellspacing="0" cellpadding="0" style="table-layout:fixed;">
+										<colgroup>
+										<col width="40%">
+										<col width="60%">
+										</colgroup>
+										<tbody id="uploadedListTable">
+										</tbody>
+										</table>
 									</div>
 								</div>
 								<!-- 이미지 -->
@@ -70,8 +78,6 @@
 </div>
 <!-- End of Page Wrapper -->
  {{> board/include/scroll}} 
-
 <!-- custom JavaScript -->
 <script src="{{springMacroRequestContext.request.contextPath}}/js/board/script.upload.js"></script>
-
 </body>

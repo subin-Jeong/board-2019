@@ -18,10 +18,6 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 	// 삭제되지 않은 데이터만 사용
 	String delCheck = "b.delFlag='N'";
 	
-	// findAllOrdering
-	//@Query("SELECT b FROM BOARD b WHERE " + delCheck + " ORDER BY b.groupNo DESC, b.groupSeq ASC, b.depth ASC")
-	//Page<Board> findAllOrdering(Pageable page);
-	
 	// findOne
 	@Query("SELECT b FROM BOARD b WHERE " + delCheck +" AND b.no = :bNo")
 	Board findOne(@Param("bNo") int bNo);

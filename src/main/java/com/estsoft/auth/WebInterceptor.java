@@ -59,6 +59,10 @@ public class WebInterceptor implements HandlerInterceptor {
 		// Access Token 재발급 필요 여부
 		boolean isNecessaryToRefresh = false;
 		
+		// Request method, path
+		String reqMethod = request.getMethod();
+		String reqPath = request.getRequestURI();
+		
 		// 로그인한 회원 정보
 		principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); 
 
@@ -84,6 +88,8 @@ public class WebInterceptor implements HandlerInterceptor {
 			}
 		}
 		
+		log.info("[REQUEST METHOD] " + reqMethod);
+		log.info("[REQUEST PATH] " + reqPath);
 		log.info("[CHECK ACCESS TOKEN][SUCCESS] " + accessToken);
 		
 		// 쿠키에서 Access Token 확인
@@ -143,13 +149,10 @@ public class WebInterceptor implements HandlerInterceptor {
 					memberRepository.updateRefreshTokenByEmail(email, authInfo.getString("refresh_token"));
 				}
 				
-
-				log.info("[REQUEST METHOD] " + request.getMethod());
-				log.info("[REQUEST PATH] " + request.getRequestURI());
 				
 				// 사용자에게 알림
 				// 페이지 전환 시에만 알림창이 뜨도록 설정
-				if(request.getMethod().equals("GET") && !request.getRequestURI().contains("/list/")) {
+				if(checkAlert(reqMethod, reqPath)) {
 					
 					response.setContentType("text/html; charset=UTF-8");
 					PrintWriter out = response.getWriter();
@@ -185,13 +188,9 @@ public class WebInterceptor implements HandlerInterceptor {
 			memberRepository.updateRefreshTokenByEmail(email, null);
 		}
 		
-		
-		log.info("[REQUEST METHOD] " + request.getMethod());
-		log.info("[REQUEST PATH] " + request.getRequestURI());
-		
 		// 사용자에게 알림
 		// 페이지 전환 시에만 알림창이 뜨도록 설정
-		if(request.getMethod().equals("GET") && !request.getRequestURI().contains("/list/")) {
+		if(checkAlert(reqMethod, reqPath)) {
 			
 			response.setContentType("text/html; charset=UTF-8");
 			PrintWriter out = response.getWriter();
@@ -238,4 +237,28 @@ public class WebInterceptor implements HandlerInterceptor {
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {}
 
+	/**
+	 * 사용자 알림 제외 Request 확인
+	 * @param path
+	 * @return boolean
+	 */
+	private boolean checkAlert(String method, String path) {
+
+		// 페이지 전환 시에만 알림
+		if(method.equals("GET")) {
+			
+			// 사용자 알림 제외 경로
+			String[] excludePath = {"/list/", "/download"};
+
+			for(int i=0; i<excludePath.length; i++) {
+
+				if(path.contains(excludePath[i])) {
+					return false;
+				}
+			}
+			
+		}
+		
+		return true;
+	}
 }
