@@ -192,7 +192,7 @@ $(document).ready(function() {
 					
 			        if(type === "display"){
 			        	
-			        	return "<a href='/upload" + data + "' style='text-decoration:none;'>" + data.substring(12) + "</a>";
+			        	return "<a href='/board/download/" + row["no"] + "' style='text-decoration:none;'>" + data.substring(12) + "</a>";
 			        	
 			        }
 			        
@@ -386,23 +386,77 @@ $(document).ready(function() {
 	});
 	
 	
+	// 검색 박스 변경
+	$("#searchType").change(function() {
+		
+		var searchString = $("#searchString");
+		var searchDate = $("#searchDate");
+		
+		if($(this).val() === "regDate") {
+			
+			searchString.css("display", "none");
+			searchDate.css("display", "block");
+			
+		} else {
+			
+			searchString.css("display", "block");
+			searchDate.css("display", "none");
+			
+		}
+		
+	});
+	
 	// 검색
-	$("#searchString").keydown(function(key) {
+	$("#searchString, #searchStartDate, #searchEndDate").keydown(function(key) {
+
+		// 날짜 형식 확인
+		var dateFormat = /^(\d{4}).(0[0-9]|1[0-2]).(0[1-9]|[1-2][0-9]|3[0-1])$/;
 		
 		// 엔터 입력 시 실행
-		if(key.keyCode == 13){
+		if(key.keyCode === 13){
 		
 			var searchType = $("#searchType").val();
-			var searchString = $("#searchString").val();
+			var searchString = $("#searchString").val().trim();
+			var searchStartDate = $("#searchStartDate").val().trim();
+			var searchEndDate = $("#searchEndDate").val().trim();
 			
 			if(!searchType) {
 				location.href = "/board/list";
 				return;
 			}
 			
-			if(!searchString) {
-				alert("검색어를 입력하세요.");
-				return false;
+			if(searchType === "regDate") {
+				
+				if(!searchStartDate && !searchEndDate) {
+					alert("검색 날짜를 입력하세요.");
+					return false;
+				} 
+				
+				if(searchStartDate.length > 0) {
+
+					// 날짜 형식 확인
+					if(!dateFormat.test(searchStartDate)) {
+						alert("검색 날짜 형식이 올바르지 않습니다.");
+						return false;
+					}
+				}
+			
+				if(searchEndDate.length > 0) {
+	
+					// 날짜 형식 확인
+					if(!dateFormat.test(searchEndDate)) {
+						alert("검색 날짜 형식이 올바르지 않습니다.");
+						return false;
+					}
+				}
+				
+			} else {
+
+				if(!searchString) {
+					alert("검색어를 입력하세요.");
+					return false;
+				}
+				
 			}
 			
 			getBoardList(1);
@@ -410,6 +464,37 @@ $(document).ready(function() {
 		
 	});
 	
+	
+	// 날짜 형식 변환
+	$("#searchStartDate, #searchEndDate").keydown(function(event) {
+		
+		// 입력 날짜
+		$text = $(this);
+		
+		// 입력받은 문자 또는 키값
+		var key = event.charCode || event.keyCode || 0;
+		
+		if(!checkKeyEvent(key)) {
+			return false;
+		}
+		
+		if(key !== 8 && key !== 9) {
+			
+			if($text.val().length === 4) {
+				$text.val($text.val() + ".");
+			}
+			
+			if($text.val().length === 7) {
+			    $text.val($text.val() + ".");
+			}
+			
+			if($text.val().length > 9) {
+			    $text.val($text.val().substring(0, 9));
+			}
+			
+		}
+		
+	});
 	
 	// 페이징 크기 변환
 	$("#pageSize").change(function() {
@@ -516,11 +601,15 @@ function getBoardList(page) {
 	// 검색 파라미터 추가
 	var searchType = $("#searchType").val();
 	var searchString = $("#searchString").val();
+	var searchStartDate = $("#searchStartDate").val();
+	var searchEndDate = $("#searchEndDate").val();
 	var reqPageSize = $("#pageSize").val();
 	
 	var data = {
 			searchType : searchType,
 			searchString : searchString,
+			searchStartDate : searchStartDate,
+			searchEndDate : searchEndDate,
 			reqPageSize : reqPageSize
 	};
 	
@@ -724,7 +813,11 @@ function drawPagination(type, totalPages) {
 	
 	// 페이지
 	var pageNum = ($("#pageNum").val() > 0) ? $("#pageNum").val() : 1;
+
+	// 페이징 객체 비우고 시작
+	$(targetObj).empty();
 	
+	// 페이징 객체 생성
 	$(targetObj).bootpag({
 		
 		total: totalPages,
@@ -749,11 +842,15 @@ function drawPagination(type, totalPages) {
 		// 검색 파라미터 추가
 		var searchType = $("#searchType").val();
 		var searchString = $("#searchString").val();
+		var searchStartDate = $("#searchStartDate").val();
+		var searchEndDate = $("#searchEndDate").val();
 		var reqPageSize = $("#pageSize").val();
 		
 		var data = {
 				searchType : searchType,
 				searchString : searchString,
+				searchStartDate : searchStartDate,
+				searchEndDate : searchEndDate,
 				reqPageSize : reqPageSize
 		};
 		

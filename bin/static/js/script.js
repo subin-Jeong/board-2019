@@ -15,3 +15,14 @@ Number.prototype.format = function(){
  
     return n;
 };
+
+// 날짜 입력 키 이벤트 확인
+function checkKeyEvent(key) {
+	
+	// Key 
+	// [8 : backSpace] [9 : tap], [37 : 왼쪽 방향키], [39 : 오른쪽 방향키], [46 : delete], [48 ~ 57 :  0 ~ 9], [96 ~105 : 넘버패드]
+	if(!(key == 8 || key == 9 || key == 37 || key == 39 || key == 46 || (key >= 48 && key <= 57) || (key >= 96 && key <= 105))) {
+		return false;
+	}
+	return true;
+}

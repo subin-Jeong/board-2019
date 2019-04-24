@@ -1,10 +1,15 @@
 package com.estsoft.web;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -209,6 +215,48 @@ public class FileController {
 			return false;
 		}
 		
+	}
+	
+	/**
+	 * 파일 다운로드
+	 * @param fNo
+	 * @param response
+	 * @throws IOException
+	 */
+	@GetMapping("/download/{fNo}")
+	public void download(@PathVariable int fNo, HttpServletResponse response) throws IOException {
+		
+		File file = fileRepository.findOne(fNo);
+		
+		if(file != null) {
+
+			java.io.File downloadFile = new java.io.File(uploadDir + file.getFileName());
+			String fileName = file.getFileName().substring(12);
+			
+			response.setContentLength((int)downloadFile.length());
+			response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ";");
+			response.setHeader("Content-Transfer-Encoding", "binary");
+			
+			OutputStream out = response.getOutputStream();
+			FileInputStream fis = null;
+			
+			try {
+				
+				fis = new FileInputStream(downloadFile);
+				FileCopyUtils.copy(fis, out);
+				
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} finally {
+				
+				if(fis != null) {
+					fis.close();
+				}
+			}
+			
+			out.flush();
+			
+		}
 	}
 	
 	

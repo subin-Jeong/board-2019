@@ -1,6 +1,9 @@
 package com.estsoft.web;
 
 import java.security.Principal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -74,6 +77,8 @@ public class BoardController {
 			@PathVariable int pageNum, 
 			@RequestParam(value = "searchType", required = false) String searchType, 
 			@RequestParam(value = "searchString", required = false) String searchString,
+			@RequestParam(value = "searchStartDate", required = false) String searchStartDate,
+			@RequestParam(value = "searchEndDate", required = false) String searchEndDate,
 			@RequestParam(value = "reqPageSize", required = false) String reqPageSize) {
 		
 		// 정렬
@@ -87,7 +92,7 @@ public class BoardController {
 		
 		// 페이징 설정
 		PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
-		
+	
 		// 글목록 가져오기
 		return boardRepository.findAll(new Specification<Board>() {
 
@@ -112,6 +117,27 @@ public class BoardController {
 						// 내용의 경우 LIKE 비교
 						case "content" :
 							predicates.add(cb.like(root.get(searchType), "%" + searchString + "%"));
+							break;
+							
+						// 날짜 범위 비교
+						case "regDate" :
+
+							try {
+								
+								DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
+
+								if(searchStartDate != null && !searchStartDate.equals("")) {
+									predicates.add(cb.greaterThanOrEqualTo(root.get(searchType), df.parse(searchStartDate)));
+								}
+								
+								if(searchEndDate != null && !searchEndDate.equals("")) {
+									predicates.add(cb.lessThanOrEqualTo(root.get(searchType), df.parse(searchEndDate)));
+								}
+								
+							} catch (ParseException e) {
+								e.printStackTrace();
+							}
+							
 							break;
 							
 						default : 

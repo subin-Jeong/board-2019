@@ -46,6 +46,21 @@ $(document).ready(function() {
 	        
 	});
 	
+
+	// 회원가입 페이지로
+	$("#btn-register").on("click", function() {
+		
+		location.href = "/member/register";
+		
+	});
+	
+	// 로그인 페이지로
+	$("#btn-login").on("click", function() {
+		
+		location.href = "/member/login";
+		
+	});
+	
 });
 
 

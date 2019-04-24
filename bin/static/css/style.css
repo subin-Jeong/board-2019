@@ -51,8 +51,17 @@ table th {
 	border-radius: 4px !important;
 }
 
+.input-search-date {
+	padding-left: 12px !important;
+	height: 30px !important;
+}
+
 .search-area {
 	font-size: 0.875rem !important;	
+}
+
+.table-hover tr:hover td {
+	background : #F8F9FC;
 }
 
 #uploadFiles {

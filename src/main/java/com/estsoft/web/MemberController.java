@@ -151,6 +151,8 @@ public class MemberController {
 	@GetMapping("/list")
 	@ResponseBody
 	public List<Map<String, String>> list() {
+		
+		System.out.println("회원정보 불러오기 실행");
 		return memberRepository.findAllEmailAndName();
 	}
 	
