@@ -12,11 +12,9 @@ $(document).ready(function() {
 		var title = $("#title").val();
 		var content = $("#contents").val();
 	    var delFlag = "N";
-	    var modifyDate = $("#modify_date").val();
-	    var regDate = $("#reg_date").val();
-	    var groupNo = ($("#group_no").val()) ? $("#group_no").val() : 0;
-	    var groupSeq = ($("#group_seq").val()) ? $("#group_seq").val() : 0;
-	    var parentNo = ($("#parent_no").val()) ? $("#parent_no").val() : 0;
+	    var groupNo = ($("#groupNo").val()) ? $("#groupNo").val() : 0;
+	    var groupSeq = ($("#groupSeq").val()) ? $("#groupSeq").val() : 0;
+	    var parentNo = ($("#parentNo").val()) ? $("#parentNo").val() : 0;
 	    var depth = ($("#depth").val()) ? $("#depth").val() : 0;
 				
 		if(!title) {
@@ -28,8 +26,6 @@ $(document).ready(function() {
 			title: title,
 		    content: content,
 		    delFlag: delFlag,
-		    modifyDate: modifyDate,
-		    regDate: regDate,
 		    groupNo: groupNo,
 			groupSeq: groupSeq,
 			parentNo: parentNo,
@@ -239,9 +235,9 @@ $(document).ready(function() {
 		
 		var bNo = $("#no").val();
 		var content = $("#contents").val();
-		var groupNo = $("#group_no").val();
-		var groupSeq = $("#group_seq").val();
-		var parentNo = $("#parent_no").val();
+		var groupNo = $("#groupNo").val();
+		var groupSeq = $("#groupSeq").val();
+		var parentNo = $("#parentNo").val();
 		var depth = $("#depth").val();
 		
 		
@@ -292,10 +288,10 @@ $(document).ready(function() {
 	$("#btn-reply-reply-save").on("click", function() {
 		
 		var bNo = $("#no").val();
-		var rNo = $("#reply_no").val();
+		var rNo = $("#replyNo").val();
 		var content = $("#replyModal #replyContents").val();
-		var groupNo = $("#group_no").val();
-		var groupSeq = $("#group_seq").val();
+		var groupNo = $("#groupNo").val();
+		var groupSeq = $("#groupSeq").val();
 		var depth = $("#depth").val();
 		
 		if(!$("#replyModal #replyContents").val()) {
@@ -340,7 +336,7 @@ $(document).ready(function() {
 	$("#btn-reply-mod").on("click", function() {
 		
 		var bNo = $("#no").val();
-		var rNo = $("#reply_no").val();
+		var rNo = $("#replyNo").val();
 		var content = $("#replyModifyModal #replyContents");
 		
 		if(!content.val()) {
@@ -569,7 +565,7 @@ $(document).ready(function() {
 
 // 답글의 댓글 번호 설정
 function setReplyNo(n) {
-	$("#reply_no").val(n); 
+	$("#replyNo").val(n); 
 }
 
 // 댓글 수정 데이터 설정
@@ -928,7 +924,6 @@ function drawPagination(type, totalPages) {
  });
 	
 }
-
 
 // 회원정보
 function getMemberList() {
