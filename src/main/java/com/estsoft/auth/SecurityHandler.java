@@ -35,7 +35,6 @@ public class SecurityHandler implements AuthenticationSuccessHandler, Authentica
 	@Autowired
 	private MemberRepository memberRepository;
 	
-	
 	// 로그인 성공 Handler
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {

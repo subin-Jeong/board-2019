@@ -24,6 +24,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableGlobalMethodSecurity(prePostEnabled = false)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+	@Autowired
+	private SecurityHandler securityHandler;
+	
+	@Autowired
+    private UserDetailsService userDetailsServiceImpl;
+	
 	@Override
 	@Bean
 	public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -44,14 +50,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return authProvider;
         
     }
-
-	@Autowired
-	private SecurityHandler securityHandler;
-	
-	@Autowired
-    private UserDetailsService userDetailsServiceImpl;
-	
-	
 	  
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -68,7 +66,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		
 	}
 
-	
 	@Override 
 	public void configure(HttpSecurity http) throws Exception {
 		http

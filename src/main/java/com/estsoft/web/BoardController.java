@@ -6,12 +6,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +36,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.estsoft.auth.SecurityConfig;
 import com.estsoft.domain.api.Board;
 import com.estsoft.repository.api.BoardRepository;
 import com.estsoft.repository.api.MemberRepository;
-
-import antlr.StringUtils;
+import com.estsoft.util.ApiUtils;
 
 @Controller
 @RequestMapping("/board")
@@ -74,21 +74,34 @@ public class BoardController {
 	 */
 	@GetMapping("/list/{pageNum}")
 	@ResponseBody 
-	public Page<Board> list(
-			@PageableDefault(size = 100) Pageable pageable, 
-			@PathVariable int pageNum, 
-			@RequestParam(value = "searchType", required = false) String searchType, 
-			@RequestParam(value = "searchString", required = false) String searchString,
-			@RequestParam(value = "searchStartDate", required = false) String searchStartDate,
-			@RequestParam(value = "searchEndDate", required = false) String searchEndDate,
-			@RequestParam(value = "reqPageSize", required = false) String reqPageSize) {
+	public Page<Board> list(@PageableDefault(size = 100) Pageable pageable, @PathVariable int pageNum, HttpServletRequest request) {
+		
+		// 검색 조건 파라미터
+		String searchType = request.getParameter("searchType");
+		String searchString = request.getParameter("searchString");
+		String searchStartDate = request.getParameter("searchStartDate");
+		String searchEndDate = request.getParameter("searchEndDate");
+		String reqPageSize = request.getParameter("reqPageSize");
+		String orderType = request.getParameter("orderType");
+		String orderField = request.getParameter("orderField");
+
+		// 기본 정렬
+		LinkedList<Order> order = new LinkedList<Order>();
+		order.addLast(new Order(Direction.DESC, "groupNo"));
+		order.addLast(new Order(Direction.ASC, "groupSeq"));
+		order.addLast(new Order(Direction.ASC, "depth"));
+		
+		// 정렬 추가
+		if(ApiUtils.isNotNullString(orderType) && ApiUtils.isNotNullString(orderField)) {
+			order.addFirst(new Order(Direction.valueOf(orderType), orderField));
+		}
 		
 		// 정렬
-		Sort sort = new Sort(new Order(Direction.DESC, "groupNo"), new Order(Direction.ASC, "groupSeq"), new Order(Direction.ASC, "depth"));
+		Sort sort = new Sort(order);
 		
 		// 페이지 크기 변경
 		int pageSize = pageable.getPageSize();
-		if(reqPageSize != null && !reqPageSize.equals("")) {
+		if(ApiUtils.isNotNullString(reqPageSize)) {
 			pageSize = Integer.parseInt(reqPageSize);
 		}
 		
@@ -107,7 +120,7 @@ public class BoardController {
 				predicates.add(cb.and(cb.equal(root.get("delFlag"), "N")));
 				
 				// 검색 컬럼에 따라 검색방식을 변경
-				if(searchType != null && !searchType.equals("")) {
+				if(ApiUtils.isNotNullString(searchType) && (ApiUtils.isNotNullString(searchString) || ApiUtils.isNotNullString(searchStartDate) || ApiUtils.isNotNullString(searchEndDate))) {
 					
 					switch(searchType) {
 					
@@ -126,14 +139,14 @@ public class BoardController {
 
 							try {
 								
-								DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
+								DateFormat df = new SimpleDateFormat("yyyy.MM.ddHH:mm:ss");
 
-								if(searchStartDate != null && !searchStartDate.equals("")) {
-									predicates.add(cb.greaterThanOrEqualTo(root.get(searchType), df.parse(searchStartDate)));
+								if(ApiUtils.isNotNullString(searchStartDate)) {
+									predicates.add(cb.greaterThanOrEqualTo(root.get(searchType), df.parse(searchStartDate + "00:00:00")));
 								}
 								
-								if(searchEndDate != null && !searchEndDate.equals("")) {
-									predicates.add(cb.lessThanOrEqualTo(root.get(searchType), df.parse(searchEndDate)));
+								if(ApiUtils.isNotNullString(searchEndDate)) {
+									predicates.add(cb.lessThanOrEqualTo(root.get(searchType), df.parse(searchEndDate + "23:59:59")));
 								}
 								
 							} catch (ParseException e) {
@@ -174,7 +187,7 @@ public class BoardController {
 		
 		String writer = principal.getName();
 		
-		if(writer != null) {
+		if(ApiUtils.isNotNullString(writer)) {
 			
 			// 현재 로그인한 사용자
 			board.setWriter(writer);
@@ -227,7 +240,7 @@ public class BoardController {
 		
 		// 작성자 확인
 		String userInfo = principal.getName();		
-		if(userInfo != null && board.getWriter().equals(userInfo)) {
+		if(ApiUtils.isNotNullString(userInfo) && board.getWriter().equals(userInfo)) {
 
 			model.addAttribute("userCheck", "Y");
 			
@@ -264,7 +277,7 @@ public class BoardController {
 		Board updateBoard = boardRepository.findOne(bNo);
 
 		// 작성자만 수정 가능
-		if(userInfo != null && updateBoard.getWriter().equals(userInfo)) {
+		if(ApiUtils.isNotNullString(userInfo) && updateBoard.getWriter().equals(userInfo)) {
 			
 			// 수정 시 제목, 내용 이외 기존 사항 반영
 			updateBoard.setNo(bNo);
@@ -300,7 +313,7 @@ public class BoardController {
 		Board board = boardRepository.findOne(bNo);
 		
 		// 작성자만 삭제 가능
-		if(userInfo != null && board.getWriter().equals(userInfo)) {
+		if(ApiUtils.isNotNullString(userInfo) && board.getWriter().equals(userInfo)) {
 
 			board.setDelFlag("Y");
 			boardRepository.save(board);
@@ -344,7 +357,7 @@ public class BoardController {
 		
 		String writer = principal.getName();
 		
-		if(writer != null) {
+		if(ApiUtils.isNotNullString(writer)) {
 
 			// 원글 번호로 groupSeq, parentNo, depth 지정
 			int groupNo = board.getGroupNo();
@@ -375,16 +388,14 @@ public class BoardController {
 				// groupSeqNew = 이전 글의 groupSeq + 이후 글의 groupSeq / 2
 				// groupSeqNew 가 소수점 아래 15자리 이상인 경우 이후 groupSeq + 1 전체 업데이트
 				double groupSeqNew = (preGroupSeq + maxGroupSeq) / 2;
-				String groupSeqNewStr = groupSeqNew + "";
 				
 				log.info("parentNo : " + parentNo);
 				log.info("preGroupSeq / maxGroupSeq : " + preGroupSeq + " / " + maxGroupSeq);
 				log.info("double : " + groupSeqNew);
-				log.info("String : " + groupSeqNewStr);
 				
 				// 소수점 자리수 확인
-				int lenCheck = groupSeqNewStr.length() - groupSeqNewStr.indexOf(".") - 1;
-				log.info("소수점 자리수 : " + lenCheck);
+				int lenCheck = ApiUtils.getDecimalLength(groupSeqNew);
+				log.info("doubleLenCheck : " + lenCheck);
 				if(lenCheck <= 15) {
 					
 					board.setGroupSeq(groupSeqNew);

@@ -1,7 +1,5 @@
 package com.estsoft.repository.api;
 
-import java.util.Map;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,6 +15,9 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 	
 	// 삭제되지 않은 데이터만 사용
 	String delCheck = "b.delFlag='N'";
+	
+	// findAll
+	Page<Board> findAll(Specification<Board> specification, Pageable pageable);	
 	
 	// findOne
 	@Query("SELECT b FROM BOARD b WHERE " + delCheck +" AND b.no = :bNo")
@@ -53,7 +54,5 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 	@Query("UPDATE BOARD b SET b.groupSeq = b.groupSeq + 1 WHERE " + delCheck + " AND b.groupNo = :groupNo AND b.groupSeq >= :groupSeq")
 	int updateGroupSeq(@Param("groupNo") int groupNo, @Param("groupSeq") double groupSeq);
 
-	Page<Board> findAll(Specification<Board> specification, Pageable pageable);
-	
 	
 } 

@@ -34,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		
-		log.info("login : " + username);
+		log.info("[LOGIN USERNAME] " + username);
 		
 		Member member = memberRepository.findByEmail(username);
 		
@@ -53,10 +53,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			customUserDetails.setGrantedAuthorities(roles);
 			
 			log.info(customUserDetails.toString());
-			
-			// Oauth2 ∏¶ ≈Î«— JWT Token »πµÊ
-			//clientTokenService.getOAuth2Token();
-			
 			
 			return customUserDetails;
 		}

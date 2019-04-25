@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.estsoft.auth.SecurityConfig;
 import com.estsoft.domain.api.Reply;
 import com.estsoft.repository.api.ReplyRepository;
+import com.estsoft.util.ApiUtils;
 
 @Controller
 @RequestMapping("/reply")
@@ -59,7 +60,7 @@ public class ReplyController {
 		
 		String writer = principal.getName();
 		
-		if(writer != null) {
+		if(ApiUtils.isNotNullString(writer)) {
 			
 			// 작성자 설정
 			reply.setWriter(writer);
@@ -94,7 +95,7 @@ public class ReplyController {
 		
 		String writer = principal.getName();
 		
-		if(writer != null) {
+		if(ApiUtils.isNotNullString(writer)) {
 			
 			int parentNo = reply.getParentNo();
 			
@@ -128,15 +129,13 @@ public class ReplyController {
 				// groupSeqNew = 이전 글의 groupSeq + 이후 글의 groupSeq / 2
 				// groupSeqNew 가 소수점 아래 15자리 이상인 경우 이후 groupSeq + 1 전체 업데이트
 				double groupSeqNew = (preGroupSeq + maxGroupSeq) / 2;
-				String groupSeqNewStr = groupSeqNew + "";
 				
 				log.info("parentNo : " + parentNo);
 				log.info("preGroupSeq / maxGroupSeq : " + preGroupSeq + " / " + maxGroupSeq);
 				log.info("double : " + groupSeqNew);
-				log.info("String : " + groupSeqNewStr);
 				
 				// 소수점 자리수 확인
-				int lenCheck = groupSeqNewStr.length() - groupSeqNewStr.indexOf(".") - 1;
+				int lenCheck = ApiUtils.getDecimalLength(groupSeqNew);
 				log.info("소수점 자리수 : " + lenCheck);
 				if(lenCheck <= 15) {
 					
@@ -201,7 +200,7 @@ public class ReplyController {
 		Reply updateReply = replyRepository.findOne(rNo);
 		
 		// 작성자만 수정 가능
-		if(userInfo != null && updateReply.getWriter().equals(userInfo)) {
+		if(ApiUtils.isNotNullString(userInfo) && updateReply.getWriter().equals(userInfo)) {
 
 			// 수정 시 내용 이외 기존 사항 반영
 			updateReply.setNo(rNo);
@@ -235,7 +234,7 @@ public class ReplyController {
 		Reply reply = replyRepository.findOne(rNo);
 
 		// 작성자만 삭제 가능
-		if(userInfo != null && reply.getWriter().equals(userInfo)) {
+		if(ApiUtils.isNotNullString(userInfo) && reply.getWriter().equals(userInfo)) {
 
 			reply.setDelFlag("Y");
 			replyRepository.save(reply);

@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.estsoft.auth.SecurityConfig;
 import com.estsoft.domain.api.File;
 import com.estsoft.repository.api.FileRepository;
+import com.estsoft.util.ApiUtils;
 import com.estsoft.util.FileUtils;
 
 @Controller
@@ -128,7 +129,7 @@ public class FileController {
             	
             	String uploadedFileName = FileUtils.fileUrlDownload(fileURL, uploadDir, fileName + "." + extension);
             	
-            	if(uploadedFileName != null) {
+            	if(ApiUtils.isNotNullString(uploadedFileName)) {
             		
                 	file.setBoardNo(boardNo);
                 	file.setFileName(uploadedFileName);

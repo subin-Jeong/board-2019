@@ -34,6 +34,9 @@ table th {
 	font-weight: bold;
 }
 
+.font-gray {
+	color: #646672 !important;	
+}
 
 .select-search {
 	color: #858796 !important;
@@ -62,6 +65,14 @@ table th {
 
 .table-hover tr:hover td {
 	background : #F8F9FC;
+}
+
+th a {
+	color: #858796 !important;
+	display : block;
+	width: 100%;
+	height: 100%;
+	text-decoration: none !important;	
 }
 
 #uploadFiles {

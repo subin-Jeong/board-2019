@@ -62,11 +62,12 @@ $(document).ready(function() {
 				
 				var originFileName = data.substring(data.indexOf("_", 16) + 1);
 				var uploadFileInput = "<input name=\"uploaded_files\" type=\"hidden\" value=\"" + data + "\">";
-				
 				var uploadedListTable = "";
+				
+				
 				uploadedListTable+= "<tr>";
-				uploadedListTable+= "<td>" + originFileName + "</td>";
-				uploadedListTable+= "<td onclick=\"deleteUploadedFile(this, '" + data + "');\"><b>X</b></td>";
+				uploadedListTable+= "	<td>" + originFileName + "</td>";
+				uploadedListTable+= "	<td onclick=\"deleteUploadedFile(this, '" + data + "');\"><b>X</b></td>";
 				uploadedListTable+= "</tr>";
 					
 				$("#uploadedListTable:last").append(uploadedListTable);

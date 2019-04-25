@@ -37,9 +37,6 @@ public class WebInterceptor implements HandlerInterceptor {
 	@Autowired
 	private MemberRepository memberRepository;
 	
-	// 인증 결과 정보
-	private JSONObject tokenInfo;
-	
 	// 로그인한 회원 정보
 	private CustomUserDetails principal;
 	
@@ -56,6 +53,9 @@ public class WebInterceptor implements HandlerInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+		// 인증 결과 정보
+		JSONObject tokenInfo = null;
+		
 		// Access Token 재발급 필요 여부
 		boolean isNecessaryToRefresh = false;
 		

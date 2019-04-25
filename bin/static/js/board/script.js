@@ -496,6 +496,7 @@ $(document).ready(function() {
 		
 	});
 	
+	
 	// 페이징 크기 변환
 	$("#pageSize").change(function() {
 		
@@ -504,6 +505,58 @@ $(document).ready(function() {
 	});
 	
 	
+	// 정렬 변경
+	$("a[name=order]").on("click", function() {
+
+		// 정렬 문자
+		var ASC = "↑";
+		var DESC = "↓";
+
+		// 선택자
+		$obj = $(this);
+		
+		// 정렬 설정 값
+		var orderTypeObj = $("#orderType");
+		var orderFieldObj = $("#orderField");
+		
+		// 선택 필드
+		var orderField = $obj.attr("field");
+		
+		// 현재 정렬 상태
+		var text = $obj.text();
+		var orderType = text.substring(text.length - 1);
+		
+		// 변경 정렬 상태
+		var appendOrderType = "";
+		if(orderType !== undefined && orderType === DESC) {
+			// 디폴트 정렬 상태
+			appendOrderType = "";
+		} else {
+			// 정렬 상태 변경
+			appendOrderType = (orderType === ASC) ? "DESC" : "ASC";
+		}
+		
+		
+		// 정렬 필드 변경 시 기존에 설정된 정렬 값 해제
+		if(orderFieldObj.val().length > 0 && orderFieldObj.val() !== orderField) {
+			var removeOrderObj = $("a[field=" + orderFieldObj.val() + "]");
+			var removeOrderObjText = removeOrderObj.text();
+			
+			removeOrderObj.text(removeOrderObjText.substring(0, removeOrderObjText.length - 1));
+		}
+		
+		// 정렬 값 설정
+		orderTypeObj.val(appendOrderType);
+		orderFieldObj.val(orderField);
+		
+		// 기존의 Direction 지우고 append
+		$obj.text($obj.text().replace(ASC, ""));
+		$obj.text($obj.text().replace(DESC, ""))
+		$obj.append(eval(appendOrderType));
+		
+		getBoardList(1);
+	
+	});
 	
 });
 
@@ -599,21 +652,9 @@ function getBoardList(page) {
 	var url = "/board/list/" + page;
 	
 	// 검색 파라미터 추가
-	var searchType = $("#searchType").val();
-	var searchString = $("#searchString").val();
-	var searchStartDate = $("#searchStartDate").val();
-	var searchEndDate = $("#searchEndDate").val();
-	var reqPageSize = $("#pageSize").val();
+	var param = $("#form").serialize();
 	
-	var data = {
-			searchType : searchType,
-			searchString : searchString,
-			searchStartDate : searchStartDate,
-			searchEndDate : searchEndDate,
-			reqPageSize : reqPageSize
-	};
-	
-	url+= "?" + $.param(data);
+	url+= "?" + param;
 	
 	$.ajax({
 	    type: "GET",
@@ -837,26 +878,15 @@ function drawPagination(type, totalPages) {
 		lastClass: "last",
 		firstClass: "first"
      	
-	}).on("page", function(event, num){
+	// unbind/bind 중복 클릭 방지
+	}).unbind("page").bind("page").on("page", function(event, num){
 
 		// 검색 파라미터 추가
-		var searchType = $("#searchType").val();
-		var searchString = $("#searchString").val();
-		var searchStartDate = $("#searchStartDate").val();
-		var searchEndDate = $("#searchEndDate").val();
-		var reqPageSize = $("#pageSize").val();
-		
-		var data = {
-				searchType : searchType,
-				searchString : searchString,
-				searchStartDate : searchStartDate,
-				searchEndDate : searchEndDate,
-				reqPageSize : reqPageSize
-		};
+		var param = $("#form").serialize();
 		
 		$.ajax({
 		    type: "GET",
-		    url: targetUrl + "/" + num + "?" + $.param(data),
+		    url: targetUrl + "/" + num + "?" + param,
 		    dataType: "json",
 		    contentType: "application/json; charset=utf-8",
 		    success:function(result){   
@@ -882,8 +912,9 @@ function drawPagination(type, totalPages) {
 		});
      
  });
-
+	
 }
+
 
 // 회원정보
 function getMemberList() {

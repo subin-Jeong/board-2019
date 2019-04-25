@@ -32,6 +32,7 @@ import com.estsoft.domain.oauth.OAuthClientDetails;
 import com.estsoft.repository.api.MemberRepository;
 import com.estsoft.repository.oauth.OAuthClientRepository;
 import com.estsoft.service.ClientTokenService;
+import com.estsoft.util.ApiUtils;
 
 @Controller
 @RequestMapping("/member")
@@ -69,7 +70,7 @@ public class MemberController {
 	public String login(@RequestParam(value = "error", required = false) String errorType, Model model) {
 		
 		// 로그인 에러 시
-		if(errorType != null) {
+		if(ApiUtils.isNotNullString(errorType)) {
 			switch(errorType) {
 				
 				// 로그인 실패
@@ -80,11 +81,6 @@ public class MemberController {
 				// 토큰 인증 실패
 				case "2" :
 					model.addAttribute("errorMsg", environment.getProperty("security.error.message.type2"));
-					break;
-					
-				// 토큰 만료	
-				case "3" :
-					model.addAttribute("alertMsg", environment.getProperty("security.error.message.type3"));
 					break;
 					
 				// 로그인 실패 메시지로 반환	
@@ -135,7 +131,7 @@ public class MemberController {
 		
 		String email = data.get("email");
 		
-		if(email != null && email != "") {
+		if(ApiUtils.isNotNullString(email)) {
 			return memberRepository.countByEmailIgnoreCase(email);
 		} else {
 			return 1;
@@ -151,8 +147,6 @@ public class MemberController {
 	@GetMapping("/list")
 	@ResponseBody
 	public List<Map<String, String>> list() {
-		
-		System.out.println("회원정보 불러오기 실행");
 		return memberRepository.findAllEmailAndName();
 	}
 	
@@ -168,9 +162,8 @@ public class MemberController {
 	@ResponseBody
 	public String refresh(Principal principal, HttpServletRequest request, HttpServletResponse response) throws JSONException, IOException {
 		
-		if(principal != null) {
-			
-			String email = principal.getName();
+		String email = principal.getName();
+		if(ApiUtils.isNotNullString(email)) {
 			
 			JSONObject authInfo = clientTokenService.refreshOAuth2Token(email);
 			if(authInfo.has("access_token")) {
@@ -227,12 +220,11 @@ public class MemberController {
 	@GetMapping("/logout")
 	public String logout(HttpServletRequest request, HttpServletResponse response, Principal principal) {
 		
-		// refresh_token 초기화
-		if(principal != null) {
-			
-			String email = principal.getName();
-			memberRepository.updateRefreshTokenByEmail(email, null);
+		String email = principal.getName();
 		
+		// refresh_token 초기화
+		if(ApiUtils.isNotNullString(email)) {
+			memberRepository.updateRefreshTokenByEmail(email, null);
 		}
 		
 		// 로그인 세션 종료 및 토큰 삭제

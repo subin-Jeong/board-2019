@@ -20,83 +20,91 @@
 						</div>
 						</h6>
 					</div>
-					<div class="card-body">
-						<input type="hidden" name="pageNum" id="pageNum" value="0">
-						<table width="100%" cellspacing="0" style="margin-bottom: 10px;" class="search-area">
-						<tr>
-							<td width="60%">
-								<select name="search_type" id="pageSize" class="custom-select-sm select-search">
-									<option value="10">10</option>
-									<option value="25">25</option>
-									<option value="50">50</option>
-									<option value="100" selected>100</option>
-								</select>
-								<b>개씩 보기</b>
-							</td>
-							<td align="right">
-								<table width="75%" cellspacing="0" cellpadding="2" style="table-layout:fixed;">
+					<form id="form">
+						<div class="card-body">
+							<input type="hidden" name="pageNum" id="pageNum" value="0">
+							<input type="hidden" name="orderType" id="orderType" value="">
+							<input type="hidden" name="orderField" id="orderField" value="">
+							<table width="100%" cellspacing="0" style="margin-bottom: 10px;" class="search-area">
+							<tr>
+								<td width="60%">
+									<select name="reqPageSize" id="pageSize" class="custom-select-sm select-search">
+										<option value="10">10</option>
+										<option value="25">25</option>
+										<option value="50">50</option>
+										<option value="100" selected>100</option>
+									</select>
+									<b>개씩 보기</b>
+								</td>
+								<td align="right">
+									<table width="75%" cellspacing="0" cellpadding="2" style="table-layout:fixed;">
+									<tr>
+										<td width="30%">
+											<select name="searchType" id="searchType" class="custom-select custom-select-sm select-search">
+												<option value="">선택</option>
+												<option value="no">번호</option>
+												<option value="title">제목</option>
+												<option value="content">내용</option>
+												<option value="writer">작성자</option>
+												<option value="regDate">등록일자</option>
+											</select>
+										</td>
+										<td align="right">
+											<input type="text" name="searchString" id="searchString" class="form-control input-search" placeholder="" size="19" style="display:block;">
+											<table id="searchDate" width="100%" cellspacing="0" cellpadding="0" style="display:none; table-layout:fixed;">
+											<tr>
+												<td align="center" width="49%">
+													<input type="text" name="searchStartDate" id="searchStartDate" class="form-control input-search input-search-date" placeholder="" size="10">
+												</td>
+												<td align="center">
+													 &nbsp;<b>~</b>&nbsp;
+												</td>
+												<td align="center" width="49%">
+													<input type="text" name="searchEndDate" id="searchEndDate" class="form-control input-search input-search-date" placeholder="" size="10">
+												</td>
+											</tr>
+											</table>
+										</td>
+									</tr>
+									</table>
+								</td>
+								</table>
+								<table class="table table-bordered table-hover" width="100%" cellspacing="0" style="table-layout:fixed;">
+								<thead>
+								<tr bgcolor="#F8F9FC" style="">
+									<th width="10%">
+										<a name="order" field="no" href="javascript:void(0);">
+										번호 </a>
+									</th>
+									<th width="50%">
+										<a name="order" field="title" href="javascript:void(0);">
+										제목 </a>
+									</th>
+									<th width="15%">
+										<a name="order" field="regDate" href="javascript:void(0);">
+										등록일자 </a>
+									</th>
+									<th width="15%">
+										<a name="order" field="writer" href="javascript:void(0);">
+										작성자 </a>
+									</th>
+								</tr>
+								</thead>
+								<tbody id="boardList">
+								</tbody>
+								</table>
+								<table width="100%" cellspacing="0" cellpadding="0">
 								<tr>
-									<td width="30%">
-										<select name="search_type" id="searchType" class="custom-select custom-select-sm select-search">
-											<option value="">선택</option>
-											<option value="no">번호</option>
-											<option value="title">제목</option>
-											<option value="content">내용</option>
-											<option value="writer">작성자</option>
-											<option value="regDate">등록일자</option>
-										</select>
+									<td id="boardListPaginationInfo" style="vertical-align:top">
 									</td>
-									<td align="right">
-										<input type="text" id="searchString" class="form-control input-search" placeholder="" size="19" style="display:block;">
-										<table id="searchDate" width="100%" cellspacing="0" cellpadding="0" style="display:none; table-layout:fixed;">
-										<tr>
-											<td align="center" width="49%">
-												<input type="text" id="searchStartDate" class="form-control input-search input-search-date" placeholder="" size="10">
-											</td>
-											<td align="center">
-												 &nbsp;<b>~</b>&nbsp;
-											</td>
-											<td align="center" width="49%">
-												<input type="text" id="searchEndDate" class="form-control input-search input-search-date" placeholder="" size="10">
-											</td>
-										</tr>
-										</table>
+									<td>
+										<div id="boardListPagination" style="float:right">
+										</div>
 									</td>
 								</tr>
 								</table>
-							</td>
-							</table>
-							<table class="table table-bordered table-hover" width="100%" cellspacing="0" style="table-layout:fixed;">
-							<thead>
-							<tr bgcolor="#F8F9FC" style="">
-								<th width="10%">
-									 번호
-								</th>
-								<th width="50%">
-									 제목
-								</th>
-								<th width="15%">
-									 등록일자
-								</th>
-								<th width="15%">
-									 작성자
-								</th>
-							</tr>
-							</thead>
-							<tbody id="boardList">
-							</tbody>
-							</table>
-							<table width="100%" cellspacing="0" cellpadding="0">
-							<tr>
-								<td id="boardListPaginationInfo" style="vertical-align:top">
-								</td>
-								<td>
-									<div id="boardListPagination" style="float:right">
-									</div>
-								</td>
-							</tr>
-							</table>
-						</div>
+							</div>
+						</form>
 					</div>
 				</div>
 				<!-- /.container-fluid -->
