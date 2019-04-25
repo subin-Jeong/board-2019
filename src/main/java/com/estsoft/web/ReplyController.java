@@ -2,6 +2,9 @@ package com.estsoft.web;
 
 import java.security.Principal;
 import java.util.Date;
+import java.util.LinkedList;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,8 +50,20 @@ public class ReplyController {
 	 */
 	@GetMapping("/list/{bNo}/{pageNum}")
 	@ResponseBody 
-	public Page<Reply> list(@PathVariable int bNo, @PathVariable int pageNum, @PageableDefault(size = 100) Pageable pageable) {
-		PageRequest pageRequest = new PageRequest(pageNum - 1, pageable.getPageSize());	
+	public Page<Reply> list(@PathVariable int bNo, @PathVariable int pageNum, @PageableDefault(size = 100) Pageable pageable, HttpServletRequest request) {
+		
+		// 검색 조건 파라미터
+		String reqPageSize = request.getParameter("reqPageSize");
+		
+		// 페이지 크기 변경
+		int pageSize = pageable.getPageSize();
+		if(ApiUtils.isNotNullString(reqPageSize)) {
+			pageSize = Integer.parseInt(reqPageSize);
+		}
+		
+		// 페이징 설정
+		PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize);
+		
 		return replyRepository.findAllByBoardNoOrdering(bNo, pageRequest); 
 	}
 	

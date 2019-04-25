@@ -18,18 +18,33 @@
 	</a>
 	<div class="collapse show" id="collapseCardExample" style="">
 		<div class="card-body">
-			<input type="hidden" name="pageNum" id="pageNum" value="0">
-			<table width="100%" cellspacing="2" cellpadding="2" align="center">
+			<form id="form">
+				<input type="hidden" name="pageNum" id="pageNum" value="0">
+				<table width="100%" cellspacing="0" style="margin-bottom: 10px;" class="search-area">
+				<tr align="right">
+					<td width="60%">
+						<select name="reqPageSize" id="replyPageSize" class="custom-select-sm select-search">
+							<option value="10">10</option>
+							<option value="25">25</option>
+							<option value="50">50</option>
+							<option value="100" selected>100</option>
+						</select>
+						<b>개씩 보기</b>
+					</td>
+				</tr>
+				</table>
+			</form>
+			<table width="100%" cellspacing="2" cellpadding="2" align="center" style="table-layout:fixed;">
 			<colgroup>
 			<col width="45%">
 			<col width="20%">
 			<col width="10%">
 			<col width="25%">
 			</colgroup>
-			<tbody id="replyList">
+			<tbody id="replyList" class="font-size-smid">
 			</tbody>
 			</table>
-			<table width="100%" cellspacing="0" cellpadding="0">
+			<table width="100%" cellspacing="0" cellpadding="0" class="font-size-smid">
 			<tr>
 				<td id="replyListPaginationInfo">
 				</td>
@@ -55,7 +70,7 @@
 						<table width="100%">
 						<tr>
 							<td width="85%">
-								<textarea class="form-control" id="reply_contents" placeholder="내용을 입력하세요" style="width:98%; height:100px; resize:none;"></textarea>
+								<textarea class="form-control" id="replyContents" placeholder="내용을 입력하세요" style="width:98%; height:100px; resize:none;"></textarea>
 							</td>
 							<td width="15%">
 								<a href="#" class="btn btn-primary btn-icon-split" id="btn-reply-reply-save">
@@ -82,7 +97,7 @@
 						<table width="100%">
 						<tr>
 							<td width="85%">
-								<textarea class="form-control" id="reply_contents" style="width:98%; height:100px; resize:none;"></textarea>
+								<textarea class="form-control" id="replyContents" style="width:98%; height:100px; resize:none;"></textarea>
 							</td>
 							<td width="15%">
 								<a href="#" class="btn btn-warning btn-icon-split" id="btn-reply-mod">

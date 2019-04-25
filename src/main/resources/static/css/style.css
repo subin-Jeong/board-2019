@@ -27,7 +27,7 @@ table th {
 }
 
 .font-size-smid {
-	font-size: 0.9em;
+	font-size: 0.9em !important;
 }
 
 .font-bold {

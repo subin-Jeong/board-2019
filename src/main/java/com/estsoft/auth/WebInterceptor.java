@@ -248,7 +248,7 @@ public class WebInterceptor implements HandlerInterceptor {
 		if(method.equals("GET")) {
 			
 			// 사용자 알림 제외 경로
-			String[] excludePath = {"/list/", "/download"};
+			String[] excludePath = {"/list/", "/download", "/file"};
 
 			for(int i=0; i<excludePath.length; i++) {
 
@@ -257,6 +257,8 @@ public class WebInterceptor implements HandlerInterceptor {
 				}
 			}
 			
+		} else {
+			return false;
 		}
 		
 		return true;

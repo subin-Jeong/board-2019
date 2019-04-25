@@ -138,7 +138,7 @@ $(document).ready(function() {
 	});
 	
 	// 글자 수 제한
-	$("#contents").on("keyup", function() {
+	$("#contents, #replyContents").on("keyup", function() {
 	    if($(this).val().length > 200) {
 	    	alert("글자수는 200자로 제한됩니다.");
 	        $(this).val($(this).val().substring(0, 200));
@@ -293,15 +293,15 @@ $(document).ready(function() {
 		
 		var bNo = $("#no").val();
 		var rNo = $("#reply_no").val();
-		var content = $("#replyModal #reply_contents").val();
+		var content = $("#replyModal #replyContents").val();
 		var groupNo = $("#group_no").val();
 		var groupSeq = $("#group_seq").val();
 		var depth = $("#depth").val();
 		
-		if(!$("#replyModal #reply_contents").val()) {
+		if(!$("#replyModal #replyContents").val()) {
 			
 			alert("내용을 입력하세요.");
-			$("#replyModal #reply_contents").focus();
+			$("#replyModal #replyContents").focus();
 			return false;
 			
 		}
@@ -341,7 +341,7 @@ $(document).ready(function() {
 		
 		var bNo = $("#no").val();
 		var rNo = $("#reply_no").val();
-		var content = $("#replyModifyModal #reply_contents");
+		var content = $("#replyModifyModal #replyContents");
 		
 		if(!content.val()) {
 			
@@ -497,10 +497,17 @@ $(document).ready(function() {
 	});
 	
 	
-	// 페이징 크기 변환
+	// 게시판 페이징 크기 변환
 	$("#pageSize").change(function() {
 		
 		getBoardList(1);
+		
+	});
+	
+	// 댓글 페이징 크기 변환
+	$("#replyPageSize").change(function() {
+		
+		getReplyList(1);
 		
 	});
 	
@@ -576,7 +583,7 @@ function setReplyData(n) {
         success:function(result){   
         	
         	// 기존 내용 설정
-        	$("#replyModifyModal #reply_contents").val(result.content);
+        	$("#replyModifyModal #replyContents").val(result.content);
         }, 
         error:function(e){   
         } 
@@ -743,9 +750,16 @@ function drawList(listObj) {
 // 댓글 가져오기
 function getReplyList(page) {
 	
+	var url = "/reply/list/" + $("#no").val() + "/" + page;
+	
+	// 검색 파라미터 추가
+	var param = $("#form").serialize();
+	
+	url+= "?" + param;
+	
 	$.ajax({
 	    type: "GET",
-	    url: "/reply/list/" + $("#no").val() + "/" + page,
+	    url: url,
 	    dataType: "json",
 	    contentType: "application/json; charset=utf-8",
 	    success:function(result){   
@@ -814,13 +828,13 @@ function drawReplyList(listObj) {
 		writer = (typeof(memberList[list["writer"]]) != "undefined") ? memberList[list["writer"]] : list["writer"];
 		
 		// 답글, 수정, 삭제 버튼
-		btnStr = "<a href='#' onclick='setReplyNo(" + list["no"] + ")' class='btn btn-success btn-icon-split' data-toggle='modal' data-target='#replyModal'>";
+		btnStr = "<a href='#' onclick='setReplyNo(" + list["no"] + ")' class='btn btn-success btn-icon-split font-size-smid' data-toggle='modal' data-target='#replyModal'>";
 		btnStr+= "<span class='text'>답글</span>";
 		btnStr+= "</a> ";
-		btnStr+= "<a href='#' onclick='setReplyNo(" + list["no"] + "); setReplyData(" + list["no"] + ");' class='btn btn-warning btn-icon-split' data-toggle='modal' data-target='#replyModifyModal'>";
+		btnStr+= "<a href='#' onclick='setReplyNo(" + list["no"] + "); setReplyData(" + list["no"] + ");' class='btn btn-warning btn-icon-split font-size-smid' data-toggle='modal' data-target='#replyModifyModal'>";
 		btnStr+= "<span class='text'>수정</span>";
 		btnStr+= "</a> ";
-		btnStr+= "<a href='#' onclick='deleteReply(" + list["no"] + ")' class='btn btn-danger btn-icon-split'>";
+		btnStr+= "<a href='#' onclick='deleteReply(" + list["no"] + ")' class='btn btn-danger btn-icon-split font-size-smid'>";
 		btnStr+= "<span class='text'>삭제</span>";
 		btnStr+= "</a>";
 		
