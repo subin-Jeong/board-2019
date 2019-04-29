@@ -711,9 +711,9 @@ function drawList(listObj) {
         
         titleHTML+= list["title"];
 
-        // 원글의 경우 댓글 개수 표시
-        if(list["depth"] === 0) {
-        	titleHTML+= "<font color='#134ba5'> [" + list["replyCount"] + "] </font>";
+        // 댓글 개수 표시
+        if(list["replyCount"] > 0){
+        	titleHTML+= "<font color='#4e73df'> [" + list["replyCount"] + "] </font>";
         }
         
         titleHTML+= "</b></a>";

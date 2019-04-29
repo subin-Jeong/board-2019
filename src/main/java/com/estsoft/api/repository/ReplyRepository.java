@@ -55,5 +55,9 @@ public interface ReplyRepository extends JpaRepository<Reply, Integer> {
 	@Transactional
 	@Query("UPDATE REPLY r SET r.groupSeq = r.groupSeq + 1 WHERE " + delCheck + " AND r.groupNo = :groupNo AND r.groupSeq >= :groupSeq")
 	int updateGroupSeq(@Param("groupNo") int groupNo, @Param("groupSeq") double groupSeq);
+	
+	// countByBoardNo
+	@Query("SELECT COUNT(no) FROM REPLY r WHERE " + delCheck + " AND r.boardNo = :boardNo")
+	int countByBoardNo(@Param("boardNo") int boardNo);
 	 
 } 

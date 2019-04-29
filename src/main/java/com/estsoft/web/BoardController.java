@@ -255,10 +255,7 @@ public class BoardController {
 		if(ApiUtils.isNotNullString(userInfo) && board.getWriter().equals(userInfo)) {
 
 			board.setDelFlag("Y");
-			Board delBoard = boardRepository.save(board);
-			
-			// 원글 댓글개수(ReplyCount) 업데이트
-			boardRepository.updateReplyCount(delBoard.getGroupNo());
+			boardRepository.save(board);
 
 			return "/board/list";
 			
@@ -364,14 +361,7 @@ public class BoardController {
 			// 등록일자를 오늘로 설정
 			board.setRegDate(new Date());
 			
-			// 답글 저장
-			Board saveBoard = boardRepository.save(board);
-			
-			// 원글 댓글개수(ReplyCount) 업데이트
-			boardRepository.updateReplyCount(saveBoard.getGroupNo());
-			
-			return saveBoard;
-						
+			return boardRepository.save(board);
 			
 		} else {
 			

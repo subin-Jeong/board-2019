@@ -27,7 +27,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.estsoft.api.domain.Board;
 import com.estsoft.api.domain.Reply;
+import com.estsoft.api.repository.BoardRepository;
 import com.estsoft.api.repository.ReplyRepository;
 import com.estsoft.security.SecurityConfig;
 import com.estsoft.util.ApiUtils;
@@ -42,6 +44,9 @@ public class ReplyController {
 	
 	@Autowired
 	private ReplyRepository replyRepository;
+	
+	@Autowired
+	private BoardRepository boardRepository;
 	
 	/**
 	 * 전체 댓글 불러오기
@@ -91,6 +96,9 @@ public class ReplyController {
 			
 			// 생성된 rNo로 groupNo 설정
 			saveReply.setGroupNo(saveReply.getNo());
+			
+			// 댓글 개수 업데이트
+			updateReplyCount(saveReply.getBoardNo());
 			
 			return replyRepository.save(saveReply);
 				
@@ -182,7 +190,12 @@ public class ReplyController {
 			// 등록일자를 오늘로 설정
 			reply.setRegDate(new Date());
 			
-			return replyRepository.save(reply);
+			Reply saveReply = replyRepository.save(reply);
+			
+			// 댓글 개수 업데이트
+			updateReplyCount(saveReply.getBoardNo());
+			
+			return saveReply;
 			
 		} else {
 			
@@ -255,9 +268,12 @@ public class ReplyController {
 		if(ApiUtils.isNotNullString(userInfo) && reply.getWriter().equals(userInfo)) {
 
 			reply.setDelFlag("Y");
-			replyRepository.save(reply);
+			Reply deleteReply = replyRepository.save(reply);
+			
+			// 댓글 개수 업데이트
+			updateReplyCount(deleteReply.getBoardNo());
 
-			return "/board/detail/" + reply.getBoardNo();
+			return "/board/detail/" + deleteReply.getBoardNo();
 			
 		} else {
 			
@@ -267,6 +283,22 @@ public class ReplyController {
 		
 	}	
 	
-	
+	/**
+	 * 게시글에 댓글 개수 업데이트
+	 * @param boardNo
+	 * @return Board
+	 */
+	private Board updateReplyCount(int boardNo) {
+		
+		// 댓글 개수 조회
+		int replyCount = replyRepository.countByBoardNo(boardNo);
+		
+		// 기존 게시글 상태
+		Board board = boardRepository.findOne(boardNo);
+		board.setReplyCount(replyCount);
+		
+		return boardRepository.save(board);
+		
+	}
 	
 }
