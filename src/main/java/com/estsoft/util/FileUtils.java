@@ -14,12 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.FileCopyUtils;
 
-import com.estsoft.auth.SecurityConfig;
+import com.estsoft.security.SecurityConfig;
 
 public class FileUtils {
 
 	// Log
-	private static Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+	private static Logger log = LoggerFactory.getLogger(FileUtils.class);
 		
 	/**
 	 * URL 로 파일 다운로드

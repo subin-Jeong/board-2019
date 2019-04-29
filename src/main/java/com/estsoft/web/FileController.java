@@ -28,9 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.estsoft.auth.SecurityConfig;
-import com.estsoft.domain.api.File;
-import com.estsoft.repository.api.FileRepository;
+import com.estsoft.api.domain.File;
+import com.estsoft.api.repository.FileRepository;
+import com.estsoft.security.SecurityConfig;
 import com.estsoft.util.ApiUtils;
 import com.estsoft.util.FileUtils;
 
@@ -40,7 +40,7 @@ import com.estsoft.util.FileUtils;
 public class FileController {
 
 	// Log
-	private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+	private Logger log = LoggerFactory.getLogger(FileController.class);
 		
 	@Autowired
 	private FileRepository fileRepository;

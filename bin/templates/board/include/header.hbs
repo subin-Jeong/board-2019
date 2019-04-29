@@ -21,10 +21,9 @@
 <ul class="navbar-nav ml-auto">
 	<li style="line-height:67px;">
 	<div class="nav-link mr-2 d-none d-lg-inline text-gray-600 small" style="margin-right:-5px">
-		 로그인 만료시각 <b>{{#expireTime}}{{.}}{{/expireTime}}</b> &nbsp; 
-		 <a href="javascript:;" id="btn-refresh">
-		 	<img align="absmiddle" src="/img/refresh.png" width="15" height="15" title="시간연장" style="margin-top:-2px;"/>
-		 </a>
+		 로그인 만료시각 <b>{{#expireTime}}{{.}}{{/expireTime}}</b> &nbsp; <a href="javascript:;" id="btn-refresh">
+		<img align="absmiddle" src="/img/refresh.png" width="15" height="15" title="시간연장" style="margin-top:-2px;"/>
+		</a>
 	</div>
 	</li>
 	<div class="topbar-divider d-none d-sm-block">
@@ -38,15 +37,19 @@
 	</a>
 	<!-- Dropdown - User Information -->
 	<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-		<a class="dropdown-item" href="javascript:;" data-toggle="modal" data-target="#logoutModal" id="btn-logout">
+		<a class="dropdown-item" href="javascript:void(0);" data-toggle="modal" data-target="#infoModal">
+		<i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+		<span class="text-gray-600 small"><b>내정보</b></span>
+		</a>
+		<a class="dropdown-item" href="javascript:void(0);" id="btn-logout">
 		<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
 		<span class="text-gray-600 small"><b>로그아웃</b></span>
 		</a>
-		<a class="dropdown-item" href="javascript:;" data-toggle="modal" data-target="#register" id="btn-register">
+		<a class="dropdown-item" href="javascript:void(0);" id="btn-register">
 		<i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
 		<span class="text-gray-600 small"><b>회원가입</b></span>
 		</a>
-		<a class="dropdown-item" href="javascript:;" data-toggle="modal" data-target="#login" id="btn-login">
+		<a class="dropdown-item" href="javascript:void(0);" id="btn-login">
 		<i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
 		<span class="text-gray-600 small"><b>다른아이디로 로그인</b></span>
 		</a>
@@ -54,4 +57,37 @@
 	</li>
 </ul>
 </nav>
+<!-- 내 정보 Modal -->
+<div class="modal fade font-size-smid" id="infoModal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header font-bold">
+				 내 정보<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<table width="100%" class="table table-bordered table-hover">
+				<tr>
+					<td width="50%" class="font-bold" align="center">
+						 이메일
+					</td>
+					<td width="50%" align="center">
+						 {{#email}}{{.}}{{/email}}
+					</td>
+				</tr>
+				<tr>
+					<td class="font-bold" align="center">
+						 이름
+					</td>
+					<td align="center">
+						 {{#userName}}{{.}}{{/userName}}
+					</td>
+				</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 내 정보 Modal -->
 <!-- End of Topbar -->

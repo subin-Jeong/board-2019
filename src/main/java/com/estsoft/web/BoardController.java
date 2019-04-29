@@ -1,18 +1,9 @@
 package com.estsoft.web;
 
 import java.security.Principal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -38,10 +29,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.estsoft.auth.SecurityConfig;
-import com.estsoft.domain.api.Board;
-import com.estsoft.repository.api.BoardRepository;
-import com.estsoft.repository.api.MemberRepository;
+import com.estsoft.api.domain.Board;
+import com.estsoft.api.repository.BoardRepository;
+import com.estsoft.api.repository.MemberRepository;
+import com.estsoft.api.specification.BoardSpecification;
+import com.estsoft.security.SecurityConfig;
 import com.estsoft.util.ApiUtils;
 
 @Controller
@@ -50,7 +42,7 @@ import com.estsoft.util.ApiUtils;
 public class BoardController {
 
 	// Log
-	private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+	private Logger log = LoggerFactory.getLogger(BoardController.class);
 		
 	@Autowired
 	private BoardRepository boardRepository;
@@ -76,15 +68,11 @@ public class BoardController {
 	@ResponseBody 
 	public Page<Board> list(@PageableDefault(size = 100) Pageable pageable, @PathVariable int pageNum, HttpServletRequest request) {
 		
-		// 검색 조건 파라미터
-		String searchType = request.getParameter("searchType");
-		String searchString = request.getParameter("searchString");
-		String searchStartDate = request.getParameter("searchStartDate");
-		String searchEndDate = request.getParameter("searchEndDate");
+		// 검색조건
 		String reqPageSize = request.getParameter("reqPageSize");
 		String orderType = request.getParameter("orderType");
 		String orderField = request.getParameter("orderField");
-
+		
 		// 기본 정렬
 		LinkedList<Order> order = new LinkedList<Order>();
 		order.addLast(new Order(Direction.DESC, "groupNo"));
@@ -109,61 +97,7 @@ public class BoardController {
 		PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
 	
 		// 글목록 가져오기
-		return boardRepository.findAll(new Specification<Board>() {
-
-			@Override
-			public Predicate toPredicate(Root<Board> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-				
-				List<Predicate> predicates = new ArrayList<>();
-				
-				// del_flag = 'N'
-				predicates.add(cb.and(cb.equal(root.get("delFlag"), "N")));
-				
-				// 검색 컬럼에 따라 검색방식을 변경
-				if(ApiUtils.isNotNullString(searchType) && (ApiUtils.isNotNullString(searchString) || ApiUtils.isNotNullString(searchStartDate) || ApiUtils.isNotNullString(searchEndDate))) {
-					
-					switch(searchType) {
-					
-						// 제목의 경우 LIKE 비교
-						case "title" :
-							predicates.add(cb.like(root.get(searchType), "%" + searchString + "%"));
-							break;
-							
-						// 내용의 경우 LIKE 비교
-						case "content" :
-							predicates.add(cb.like(root.get(searchType), "%" + searchString + "%"));
-							break;
-							
-						// 날짜 범위 비교
-						case "regDate" :
-
-							try {
-								
-								DateFormat df = new SimpleDateFormat("yyyy.MM.ddHH:mm:ss");
-
-								if(ApiUtils.isNotNullString(searchStartDate)) {
-									predicates.add(cb.greaterThanOrEqualTo(root.get(searchType), df.parse(searchStartDate + "00:00:00")));
-								}
-								
-								if(ApiUtils.isNotNullString(searchEndDate)) {
-									predicates.add(cb.lessThanOrEqualTo(root.get(searchType), df.parse(searchEndDate + "23:59:59")));
-								}
-								
-							} catch (ParseException e) {
-								e.printStackTrace();
-							}
-							
-							break;
-							
-						default : 
-							predicates.add(cb.and(cb.equal(root.get(searchType), searchString)));
-							break;
-					}
-				}
-				return cb.and(predicates.toArray(new Predicate[predicates.size()]));
-			}
-			
-		}, pageRequest);
+		return boardRepository.findAll(BoardSpecification.list(request.getParameterMap()), pageRequest);
 		
 	}
 	
@@ -218,6 +152,7 @@ public class BoardController {
 	@GetMapping("/detail/{bNo}")
 	public String detail(@PathVariable int bNo, Model model, Principal principal) {
 		
+		// 기존 게시글
 		Board board = boardRepository.findOne(bNo);
 		
 		// 존재하지 않는 게시글 (삭제 게시글 포함) 접근하는 경우
@@ -233,9 +168,13 @@ public class BoardController {
 			writerName = board.getWriter();
 		}
 		
-		model.addAttribute("board", board);
-		model.addAttribute("formattedRegDate", board.getFormattedRegDate());
-		model.addAttribute("formattedModifyDate", board.getFormattedModifyDate());
+		// 조회수 증가
+		board.setHit(board.getHit() + 1);
+		Board newBoard = boardRepository.save(board);
+		
+		model.addAttribute("board", newBoard);
+		model.addAttribute("formattedRegDate", newBoard.getFormattedRegDate());
+		model.addAttribute("formattedModifyDate", newBoard.getFormattedModifyDate());
 		model.addAttribute("writerName", writerName);
 		
 		// 작성자 확인
@@ -316,7 +255,10 @@ public class BoardController {
 		if(ApiUtils.isNotNullString(userInfo) && board.getWriter().equals(userInfo)) {
 
 			board.setDelFlag("Y");
-			boardRepository.save(board);
+			Board delBoard = boardRepository.save(board);
+			
+			// 원글 댓글개수(ReplyCount) 업데이트
+			boardRepository.updateReplyCount(delBoard.getGroupNo());
 
 			return "/board/list";
 			
@@ -422,7 +364,14 @@ public class BoardController {
 			// 등록일자를 오늘로 설정
 			board.setRegDate(new Date());
 			
-			return boardRepository.save(board);
+			// 답글 저장
+			Board saveBoard = boardRepository.save(board);
+			
+			// 원글 댓글개수(ReplyCount) 업데이트
+			boardRepository.updateReplyCount(saveBoard.getGroupNo());
+			
+			return saveBoard;
+						
 			
 		} else {
 			

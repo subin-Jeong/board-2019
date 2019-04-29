@@ -522,12 +522,10 @@ $(document).ready(function() {
 		var orderTypeObj = $("#orderType");
 		var orderFieldObj = $("#orderField");
 		
-		// 선택 필드
-		var orderField = $obj.attr("field");
-		
 		// 현재 정렬 상태
 		var text = $obj.text();
 		var orderType = text.substring(text.length - 1);
+		var orderField = $obj.attr("field");
 		
 		// 변경 정렬 상태
 		var appendOrderType = "";
@@ -712,6 +710,12 @@ function drawList(listObj) {
         }
         
         titleHTML+= list["title"];
+
+        // 원글의 경우 댓글 개수 표시
+        if(list["depth"] === 0) {
+        	titleHTML+= "<font color='#134ba5'> [" + list["replyCount"] + "] </font>";
+        }
+        
         titleHTML+= "</b></a>";
         
         // regDate
@@ -735,6 +739,7 @@ function drawList(listObj) {
 		listHTML+= "	</td>";
 		listHTML+= "	<td class='dt-body-center'>" + regDate + "</td>";
 		listHTML+= "	<td class='dt-body-center' title='" + list["writer"] + "'>" + writer + "</td>";
+		listHTML+= "	<td class='dt-body-center'>" + list["hit"] + "</td>";
 		listHTML+= "</tr>";
 		
 	}

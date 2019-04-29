@@ -31,4 +31,20 @@ public class ApiUtils {
 		return false;
 		
 	}
+	
+	/**
+	 * 정수 변환 가능한 문자열인지 확인
+	 * @param string
+	 * @return boolean
+	 */
+	public static boolean isStringInteger(String string) {
+		
+		try {
+			Integer.parseInt(string);
+			return true;
+		} catch(NumberFormatException e) {
+			return false;
+		}
+		
+	}
 }

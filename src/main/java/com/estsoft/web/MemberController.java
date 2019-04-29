@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.estsoft.domain.api.Member;
-import com.estsoft.domain.oauth.OAuthClientDetails;
-import com.estsoft.repository.api.MemberRepository;
-import com.estsoft.repository.oauth.OAuthClientRepository;
-import com.estsoft.service.ClientTokenService;
+import com.estsoft.api.domain.Member;
+import com.estsoft.api.repository.MemberRepository;
+import com.estsoft.oauth.domain.OAuthClientDetails;
+import com.estsoft.oauth.repository.OAuthClientRepository;
+import com.estsoft.security.service.ClientTokenService;
 import com.estsoft.util.ApiUtils;
 
 @Controller

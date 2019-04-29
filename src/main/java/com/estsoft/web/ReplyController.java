@@ -27,9 +27,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.estsoft.auth.SecurityConfig;
-import com.estsoft.domain.api.Reply;
-import com.estsoft.repository.api.ReplyRepository;
+import com.estsoft.api.domain.Reply;
+import com.estsoft.api.repository.ReplyRepository;
+import com.estsoft.security.SecurityConfig;
 import com.estsoft.util.ApiUtils;
 
 @Controller
@@ -38,7 +38,7 @@ import com.estsoft.util.ApiUtils;
 public class ReplyController {
 
 	// Log
-	private Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+	private Logger log = LoggerFactory.getLogger(ReplyController.class);
 	
 	@Autowired
 	private ReplyRepository replyRepository;

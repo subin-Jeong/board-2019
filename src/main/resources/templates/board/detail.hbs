@@ -26,15 +26,7 @@
 								<input type="hidden" class="form-control" id="no" value="{{board.no}}">
 								<input type="hidden" class="form-control" id="userCheck" value="{{#userCheck}}{{.}}{{/userCheck}}">
 								<tr class="form-group">
-									<td width="15%" align="center" style="vertical-align:middle">
-										 내용
-									</td>
-									<td>
-										 {{board.content}}
-									</td>
-								</tr>
-								<tr class="form-group">
-									<td align="center">
+									<td width="15%" align="center">
 										 등록일자
 									</td>
 									<td>
@@ -47,6 +39,22 @@
 									</td>
 									<td>
 										 {{formattedModifyDate}}
+									</td>
+								</tr>
+								<tr class="form-group">
+									<td align="center">
+										 조회수
+									</td>
+									<td>
+										 {{board.hit}} 회
+									</td>
+								</tr>
+								<tr class="form-group">
+									<td align="center" style="vertical-align:middle">
+										 내용
+									</td>
+									<td>
+										 {{board.content}}
 									</td>
 								</tr>
 							</form>
