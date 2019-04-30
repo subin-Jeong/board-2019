@@ -43,7 +43,6 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Qualifier("dataSource")
     private DataSource dataSource;
 
-    
     @Bean
     public TokenStore tokenStore() {
     	
@@ -71,7 +70,8 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
     
     /**
-     * OAuth2 Create Token
+     * OAuth2 EndPoint
+     * OAuth2 서버가 작동하기 위한 EndPoint에 대한 정보 설정
      */
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
@@ -82,6 +82,7 @@ public class OAuthServerConfig extends AuthorizationServerConfigurerAdapter {
     
     /**
      * OAuth2 Access Permit
+     * OAuth2 인증서버 자체의 보안 정보 설정
      */
     @Override
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) {

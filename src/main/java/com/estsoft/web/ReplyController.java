@@ -45,9 +45,6 @@ public class ReplyController {
 	@Autowired
 	private ReplyRepository replyRepository;
 	
-	@Autowired
-	private BoardRepository boardRepository;
-	
 	/**
 	 * 전체 댓글 불러오기
 	 * @param bNo
@@ -96,9 +93,6 @@ public class ReplyController {
 			
 			// 생성된 rNo로 groupNo 설정
 			saveReply.setGroupNo(saveReply.getNo());
-			
-			// 댓글 개수 업데이트
-			updateReplyCount(saveReply.getBoardNo());
 			
 			return replyRepository.save(saveReply);
 				
@@ -190,12 +184,7 @@ public class ReplyController {
 			// 등록일자를 오늘로 설정
 			reply.setRegDate(new Date());
 			
-			Reply saveReply = replyRepository.save(reply);
-			
-			// 댓글 개수 업데이트
-			updateReplyCount(saveReply.getBoardNo());
-			
-			return saveReply;
+			return replyRepository.save(reply);
 			
 		} else {
 			
@@ -268,12 +257,9 @@ public class ReplyController {
 		if(ApiUtils.isNotNullString(userInfo) && reply.getWriter().equals(userInfo)) {
 
 			reply.setDelFlag("Y");
-			Reply deleteReply = replyRepository.save(reply);
+			replyRepository.save(reply);
 			
-			// 댓글 개수 업데이트
-			updateReplyCount(deleteReply.getBoardNo());
-
-			return "/board/detail/" + deleteReply.getBoardNo();
+			return "/board/detail/" + reply.getBoardNo();
 			
 		} else {
 			
@@ -282,23 +268,5 @@ public class ReplyController {
 		}
 		
 	}	
-	
-	/**
-	 * 게시글에 댓글 개수 업데이트
-	 * @param boardNo
-	 * @return Board
-	 */
-	private Board updateReplyCount(int boardNo) {
-		
-		// 댓글 개수 조회
-		int replyCount = replyRepository.countByBoardNo(boardNo);
-		
-		// 기존 게시글 상태
-		Board board = boardRepository.findOne(boardNo);
-		board.setReplyCount(replyCount);
-		
-		return boardRepository.save(board);
-		
-	}
 	
 }
