@@ -1,4 +1,4 @@
-package com.estsoft.security;
+package com.estsoft.api.security;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -18,8 +18,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.estsoft.api.repository.MemberRepository;
+import com.estsoft.api.security.service.ClientTokenService;
 import com.estsoft.oauth.domain.CustomUserDetails;
-import com.estsoft.security.service.ClientTokenService;
 import com.estsoft.util.ApiUtils;
 
 /**

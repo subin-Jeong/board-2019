@@ -1,4 +1,4 @@
-package com.estsoft.web;
+package com.estsoft.api.web;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.estsoft.api.domain.File;
 import com.estsoft.api.repository.FileRepository;
-import com.estsoft.security.SecurityConfig;
+import com.estsoft.api.security.SecurityConfig;
 import com.estsoft.util.ApiUtils;
 import com.estsoft.util.FileUtils;
 

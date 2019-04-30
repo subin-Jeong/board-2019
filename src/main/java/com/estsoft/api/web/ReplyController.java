@@ -1,4 +1,4 @@
-package com.estsoft.web;
+package com.estsoft.api.web;
 
 import java.security.Principal;
 import java.util.Date;
@@ -31,7 +31,7 @@ import com.estsoft.api.domain.Board;
 import com.estsoft.api.domain.Reply;
 import com.estsoft.api.repository.BoardRepository;
 import com.estsoft.api.repository.ReplyRepository;
-import com.estsoft.security.SecurityConfig;
+import com.estsoft.api.security.SecurityConfig;
 import com.estsoft.util.ApiUtils;
 
 @Controller

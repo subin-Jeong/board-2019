@@ -1,4 +1,4 @@
-package com.estsoft.security;
+package com.estsoft.api.security;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import com.estsoft.api.repository.MemberRepository;
-import com.estsoft.security.service.ClientTokenService;
+import com.estsoft.api.security.service.ClientTokenService;
 import com.estsoft.util.ApiUtils;
 
 @Component

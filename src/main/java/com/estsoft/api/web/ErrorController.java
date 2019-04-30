@@ -1,4 +1,4 @@
-package com.estsoft.web;
+package com.estsoft.api.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

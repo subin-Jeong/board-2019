@@ -1,4 +1,4 @@
-package com.estsoft.security.service;
+package com.estsoft.api.security.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 
 import com.estsoft.api.domain.Member;
 import com.estsoft.api.repository.MemberRepository;
-import com.estsoft.security.SecurityConfig;
+import com.estsoft.api.security.SecurityConfig;
 
 
 /**
