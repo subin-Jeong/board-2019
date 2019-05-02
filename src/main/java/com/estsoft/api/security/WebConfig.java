@@ -3,7 +3,6 @@ package com.estsoft.api.security;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -44,7 +43,7 @@ public class WebConfig implements WebMvcConfigurer {
 	private HandlerInterceptor interceptor;
 	
 	@Bean
-    public HttpMessageConverter escapingConverter() {
+    public HttpMessageConverter<?> escapingConverter() {
 		
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.getFactory().setCharacterEscapes(new HTMLCharacterEscapes());
