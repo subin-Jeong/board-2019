@@ -53,8 +53,8 @@ public class MemberController {
 	private Environment environment;
 	
 	/**
-	 * ?��?���??�� ?��?���?
-	 * @return 리다?��?��?�� ?�� �? ?��?���?
+	 * 회원가입 페이지
+	 * @return 리다이렉트 될 뷰 페이지
 	 */
 	@GetMapping("/register")
 	public String register() {
@@ -63,27 +63,27 @@ public class MemberController {
 	
 	
 	/**
-	 * 로그?�� ?��?���?
-	 * @return 리다?��?��?�� ?�� �? ?��?���?
+	 * 로그인 페이지
+	 * @return 리다이렉트 될 뷰 페이지
 	 */
 	@GetMapping("/login")
 	public String login(@RequestParam(value = "error", required = false) String errorType, Model model) {
 		
-		// 로그?�� ?��?�� ?��
+		// 로그인 에러 시
 		if(ApiUtils.isNotNullString(errorType)) {
 			switch(errorType) {
 				
-				// 로그?�� ?��?��
+				// 로그인 실패
 				case "1" : 
 					model.addAttribute("errorMsg", environment.getProperty("security.error.message.type1"));
 					break;
 					
-				// ?��?�� ?���? ?��?��
+				// 토큰 인증 실패
 				case "2" :
 					model.addAttribute("errorMsg", environment.getProperty("security.error.message.type2"));
 					break;
 					
-				// 로그?�� ?��?�� 메시�?�? 반환	
+				// 로그인 실패 메시지로 반환	
 				default : model.addAttribute("errorMsg", environment.getProperty("security.error.message.type1"));
 			
 			}
@@ -93,9 +93,9 @@ public class MemberController {
 	}
 	
 	/**
-	 * ?��?���??��
+	 * 회원가입
 	 * @param member
-	 * @return ?��록된 Member Entity
+	 * @return 등록된 Member Entity
 	 */
 	@PostMapping("/register")
 	@ResponseBody
@@ -103,12 +103,12 @@ public class MemberController {
 		
 		member.setPassword(new BCryptPasswordEncoder().encode(member.getPassword()));
 		
-		// OAuth2 Server Client ?���?
+		// OAuth2 Server Client 등록
 		OAuthClientDetails oauthClient = setOAuth2Client();
 		
 		if(oauthClient != null) {
 		
-			// ?��?�� ?��?��블에 ?���? client_id ???��
+			// 회원 테이블에 연관 client_id 저장
 			
 			member.setClientId(oauthClient.getClientId());
 			return memberRepository.save(member);
@@ -121,9 +121,9 @@ public class MemberController {
 	}
 	
 	/**
-	 * ?��메일 중복?��?��
+	 * 이메일 중복확인
 	 * @param email
-	 * @return ?��메일�? ?��?��?�� ?��?��?���?
+	 * @return 이메일로 확인된 회원정보
 	 */
 	@PostMapping("/email")
 	@ResponseBody
@@ -141,8 +141,8 @@ public class MemberController {
 	
 	
 	/**
-	 * ?��?�� ?��메일, ?���? ?���? �??��?���?
-	 * @return Map<?��메일, ?���?>
+	 * 회원 이메일, 이름 정보 가져오기
+	 * @return Map<이메일, 이름>
 	 */
 	@GetMapping("/list")
 	@ResponseBody
@@ -152,7 +152,7 @@ public class MemberController {
 	
 	
 	/**
-	 * ?��?�� Access Token 갱신 (refresh_token ?��?��)
+	 * 수동 Access Token 갱신 (refresh_token 이용)
 	 * @param principal
 	 * @return
 	 * @throws JSONException 
@@ -168,8 +168,8 @@ public class MemberController {
 			JSONObject authInfo = clientTokenService.refreshOAuth2Token(email);
 			if(authInfo.has("access_token")) {
 				
-				// Token ?��?��
-				// 기존 access_token 쿠키�? 비유?�� 처리 ?��, ?���? �??��
+				// Token 유효
+				// 기존 access_token 쿠키를 비유효 처리 후, 새로 부여
 				Cookie[] oldCookies = request.getCookies();
 				for(Cookie cookie : oldCookies) {
 					
@@ -183,11 +183,11 @@ public class MemberController {
 					
 				}
 				
-				// ?��로운 쿠키 발급
+				// 새로운 쿠키 발급
 				Cookie addCookie = clientTokenService.makeAccessTokenCookie(authInfo);
 				response.addCookie(addCookie);
 				
-				// 추후 access_token ?��발급?�� ?��?�� refresh_token ???��
+				// 추후 access_token 재발급을 위해 refresh_token 저장
 				if(authInfo.has("refresh_token")) {
 					
 					String refreshToken = authInfo.getString("refresh_token");
@@ -195,13 +195,13 @@ public class MemberController {
 				
 				}
 				
-				// refresh_token ?���? ?��로운 access_token 발급 ?���?
+				// refresh_token 으로 새로운 access_token 발급 성공
 				return HttpStatus.OK.toString();
 				
 			} else if(authInfo.has("error")) {
 				if(authInfo.getString("error_description").contains("expired")) {
 					
-					// refresh_token 만료, access_token ?��발급 불�?
+					// refresh_token 만료, access_token 재발급 불가
 					return HttpStatus.NO_CONTENT.toString();
 					
 				}
@@ -212,22 +212,22 @@ public class MemberController {
 	}
 	
 	/**
-	 * 로그?��?��
+	 * 로그아웃
 	 * @param request
 	 * @param response
-	 * @return 로그?�� ?��?���?
+	 * @return 로그인 페이지
 	 */
 	@GetMapping("/logout")
 	public String logout(HttpServletRequest request, HttpServletResponse response, Principal principal) {
 		
 		String email = principal.getName();
 		
-		// refresh_token 초기?��
+		// refresh_token 초기화
 		if(ApiUtils.isNotNullString(email)) {
 			memberRepository.updateRefreshTokenByEmail(email, null);
 		}
 		
-		// 로그?�� ?��?�� 종료 �? ?��?�� ?��?��
+		// 로그인 세션 종료 및 토큰 삭제
 		request.getSession(false);
 		
 		Cookie[] cookies = request.getCookies();
@@ -251,14 +251,14 @@ public class MemberController {
 	}
 	
 	/**
-	 * OAuth2 Server Client ?���?
+	 * OAuth2 Server Client 등록
 	 * @return OAuthClientDetails
 	 */
 	private OAuthClientDetails setOAuth2Client() {
 		
 		OAuthClientDetails oauthClient = new OAuthClientDetails();
 
-		// client_id : ?���? 발급
+		// client_id : 새로 발급
 		int newId = oAuthClientRepository.findMaxId() + 1;
 		String clientId = "client_" + newId;
 		String clientPassword = new BCryptPasswordEncoder().encode(environment.getProperty("security.oauth2.client.client-secret"));
@@ -268,7 +268,7 @@ public class MemberController {
 		int accessTokenValidity = Integer.parseInt(environment.getProperty("security.oauth2.client.access-token-validity-seconds"));
 		int refreshTokenValidity = Integer.parseInt(environment.getProperty("security.oauth2.client.refresh-token-validity-seconds"));
 				
-		// 기본 ?��?��
+		// 기본 설정
 		oauthClient.setCreated(new Date());
 		oauthClient.setClientId(clientId);
 		oauthClient.setClientSecret(clientPassword);
