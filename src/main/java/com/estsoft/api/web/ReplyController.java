@@ -2,7 +2,6 @@ package com.estsoft.api.web;
 
 import java.security.Principal;
 import java.util.Date;
-import java.util.LinkedList;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,9 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.estsoft.api.domain.Board;
 import com.estsoft.api.domain.Reply;
-import com.estsoft.api.repository.BoardRepository;
 import com.estsoft.api.repository.ReplyRepository;
-import com.estsoft.api.security.SecurityConfig;
 import com.estsoft.util.ApiUtils;
 
 @Controller

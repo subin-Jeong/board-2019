@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import com.estsoft.api.domain.Member;
 import com.estsoft.api.repository.MemberRepository;
-import com.estsoft.api.security.SecurityConfig;
 
 
 /**
