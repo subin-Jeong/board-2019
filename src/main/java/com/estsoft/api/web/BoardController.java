@@ -148,7 +148,7 @@ public class BoardController {
 	 * @return 리다이렉트 될 뷰 페이지
 	 */
 	@GetMapping("/detail/{bNo}")
-	public String detail(@PathVariable int bNo, Model model, Principal principal) {
+	public String detail(@PathVariable int bNo, Model model, Principal principal, HttpServletRequest request) {
 		
 		// 기존 게시글
 		Board board = boardRepository.findOne(bNo);
@@ -178,9 +178,7 @@ public class BoardController {
 		// 작성자 확인
 		String userInfo = principal.getName();		
 		if(ApiUtils.isNotNullString(userInfo) && board.getWriter().equals(userInfo)) {
-
 			model.addAttribute("userCheck", "Y");
-			
 		}
 		
 		return "/board/detail";

@@ -66,7 +66,6 @@ $(document).ready(function() {
 	        	location.href = "/member/login";
 	        }, 
 	        error:function(e){  
-	            alert(e.responseText);  
 	        }
 	    });
 		    

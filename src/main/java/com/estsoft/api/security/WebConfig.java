@@ -60,7 +60,7 @@ public class WebConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		
 		registry.addInterceptor(interceptor)
-				.addPathPatterns("/board/**", "/reply/**")
+				.addPathPatterns("/**", "/board/**", "/reply/**")
 				.excludePathPatterns("/member/**", "/oauth/**", "/css/**", "/img/**", "/js/**", "/vendor/**");
 		
 	}
@@ -114,7 +114,6 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {}
-
 	
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {}

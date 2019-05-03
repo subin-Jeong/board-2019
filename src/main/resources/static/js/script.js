@@ -1,3 +1,23 @@
+// Ajax Error Handling
+function sendRedirect(status) {
+	
+	switch(status) {
+		
+		// 인증 만료
+		case 0 :
+		case 500 :
+			alert("인증 시간이 만료되었습니다. 재로그인 하시기 바랍니다.");
+			location.href = "/member/login";
+			break;
+		
+		default :
+			alert("문제가 발생하였습니다. 재로그인 하시기 바랍니다." + status);
+			location.href = "/member/login";
+			break;
+	}
+	
+}
+
 // 숫자 0 자동채우기
 function zeroPad(n, width) {
 	n = n + "";
@@ -26,3 +46,4 @@ function checkKeyEvent(key) {
 	}
 	return true;
 }
+

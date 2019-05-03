@@ -73,7 +73,10 @@ $(document).ready(function() {
 				$("#uploadedListTable:last").append(uploadedListTable);
 				$("#uploadedList").append(uploadFileInput);
 				
-			}
+			},
+			error:function(e){
+				sendRedirect(e.status);
+	        } 
 			
 		});
 	});		

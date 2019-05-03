@@ -3,6 +3,8 @@ package com.estsoft.api.security;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -60,9 +62,11 @@ public class WebInterceptor implements HandlerInterceptor {
 		// Access Token 재발급 필요 여부
 		boolean isNecessaryToRefresh = false;
 		
-		// Request method, path
-		String reqMethod = request.getMethod();
-		String reqPath = request.getRequestURI();
+		// Request method, path, header
+		Map<String, String> requestMap = new HashMap<>();
+		requestMap.put("method", request.getMethod());
+		requestMap.put("path", request.getRequestURI());
+		requestMap.put("header", request.getHeader("x-requested-with"));
 		
 		// 로그인한 회원 정보
 		principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); 
@@ -89,8 +93,9 @@ public class WebInterceptor implements HandlerInterceptor {
 			}
 		}
 		
-		log.info("[REQUEST METHOD] " + reqMethod);
-		log.info("[REQUEST PATH] " + reqPath);
+		log.info("[REQUEST METHOD] " + requestMap.get("method"));
+		log.info("[REQUEST PATH] " + requestMap.get("path"));
+		log.info("[REQUEST HEADER] " + requestMap.get("header"));
 		log.info("[CHECK ACCESS TOKEN][SUCCESS] " + accessToken);
 		
 		// 쿠키에서 Access Token 확인
@@ -152,8 +157,8 @@ public class WebInterceptor implements HandlerInterceptor {
 				
 				
 				// 사용자에게 알림
-				// 페이지 전환 시에만 알림창이 뜨도록 설정
-				if(checkAlert(reqMethod, reqPath)) {
+				// 페이지 전환 시에만 알림처리
+				if(checkAlert(requestMap)) {
 					
 					response.setContentType("text/html; charset=UTF-8");
 					PrintWriter out = response.getWriter();
@@ -190,8 +195,8 @@ public class WebInterceptor implements HandlerInterceptor {
 		}
 		
 		// 사용자에게 알림
-		// 페이지 전환 시에만 알림창이 뜨도록 설정
-		if(checkAlert(reqMethod, reqPath)) {
+		// 페이지 전환시에는 알림 메시지를 뿌려주고, 아닌 경우 에러메시지로 전달
+		if(checkAlert(requestMap)) {
 			
 			response.setContentType("text/html; charset=UTF-8");
 			PrintWriter out = response.getWriter();
@@ -201,10 +206,18 @@ public class WebInterceptor implements HandlerInterceptor {
 					  + "</script>");
 			out.flush();
 			
+		} else {
+
+			// 페이지 내에서의 다운로드는 허용
+			String path = requestMap.get("path");
+			if(ApiUtils.isNotNullString(path) && path.contains("/download")) {
+				return true;
+			}
+			
+			response.sendError(500);
 		}
 		
-		return true;
-	
+		return false;
 	}
 
 	@Override
@@ -239,27 +252,39 @@ public class WebInterceptor implements HandlerInterceptor {
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {}
 
+	
 	/**
-	 * 사용자 알림 제외 Request 확인
+	 * 사용자 알림을 위한 Request 확인
 	 * @param path
 	 * @return boolean
 	 */
-	private boolean checkAlert(String method, String path) {
+	private boolean checkAlert(Map<String, String> requestMap) {
 
-		// 페이지 전환 시에만 알림
-		if(method.equals("GET")) {
+		String method = requestMap.get("method");
+		String path = requestMap.get("path");
+		String header = requestMap.get("header");
+		
+		// 페이지 전환이 이루어지지 않는 경우(ajax) 에러 메시지로 전달
+		if(ApiUtils.isNotNullString(method) && method.equals("GET")) {
+
+			// 페이지 내  첨부파일 다운로드는 허용
+			if(ApiUtils.isNotNullString(path) && path.contains("/download")) {
+				return false;
+			}
 			
 			// 사용자 알림 제외 경로
-			String[] excludePath = {"/list/", "/download", "/file"};
-
-			for(int i=0; i<excludePath.length; i++) {
-				if(path.contains(excludePath[i])) {
-					return false;
-				}
+			// 페이지 전환이 이루어지지 않는 경우(ajax) 에러 메시지로 전달
+			String ajaxHeaderValue = "XMLHttpRequest";
+			if(ApiUtils.isNotNullString(header) && header.equals(ajaxHeaderValue)) {
+				log.info("[EXCLUDE PATH] " + path);
+				return false;
 			}
+			
 		} else {
 			return false;
 		}
+		
 		return true;
 	}
+	
 }

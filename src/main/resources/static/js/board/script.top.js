@@ -30,6 +30,7 @@ $(document).ready(function() {
 		        
 	        }, 
 	        error:function(e){  
+	        	sendRedirect(e.status);
 	        } 
 	
 	    });

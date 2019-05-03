@@ -51,6 +51,7 @@ $(document).ready(function() {
 	        	
 	        }, 
 	        error:function(e){   
+	        	sendRedirect(e.status);
 	        } 
 	
 	    });
@@ -96,6 +97,7 @@ $(document).ready(function() {
 	        	
 	        }, 
 	        error:function(e){  
+	        	sendRedirect(e.status);
 	        } 
 	
 	    });
@@ -121,6 +123,7 @@ $(document).ready(function() {
 	        	
 	        }, 
 	        error:function(e){  
+	        	sendRedirect(e.status);
 	        } 
 	
 	    });
@@ -166,9 +169,14 @@ $(document).ready(function() {
 		ordering: false,
 		ServerSide: false,
 		searching: false,
-		sAjaxSource : "/board/file/" + $("#no").val(),
-        sServerMethod: "GET",
-		sAjaxDataProp: "",
+		ajax : {
+			url : "/board/file/" + $("#no").val(),
+			type : "GET",
+			dataSrc : "",
+			error : function(e) {
+				sendRedirect(e.status);
+			}
+		},
 		columns: [
 			{ data: "fileName",
 				
@@ -273,6 +281,7 @@ $(document).ready(function() {
 	        	
 	        }, 
 	        error:function(e){  
+	        	sendRedirect(e.status);
 	        } 
 	
 	    });
@@ -326,6 +335,7 @@ $(document).ready(function() {
 	        	
 	        }, 
 	        error:function(e){   
+	        	sendRedirect(e.status);
 	        } 
 	
 	    });
@@ -375,6 +385,7 @@ $(document).ready(function() {
 	        	
 	        }, 
 	        error:function(e){   
+	        	sendRedirect(e.status);
 	        } 
 	
 	    });
@@ -580,6 +591,7 @@ function setReplyData(n) {
         	$("#replyModifyModal #replyContents").val(result.content);
         }, 
         error:function(e){   
+        	sendRedirect(e.status);
         } 
 
     });
@@ -611,6 +623,7 @@ function deleteReply(rNo) {
         	
         }, 
         error:function(e){   
+        	sendRedirect(e.status);
         } 
 
     });
@@ -641,6 +654,7 @@ function deleteFile(fNo) {
         	
         }, 
         error:function(e){   
+        	sendRedirect(e.status);
         } 
 
     });
@@ -674,7 +688,8 @@ function getBoardList(page) {
 	    	drawList(result["content"]);
 	    	
 	    }, 
-	    error:function(e){  
+	    error:function(e){
+	    	sendRedirect(e.status);
 	    } 
 
 	});
@@ -697,7 +712,7 @@ function drawList(listObj) {
 		// title
 		var titleHTML = "";
         titleHTML+= "<a href='/board/detail/"+  list["no"] +"' style='text-decoration:none; color:#858796;'><b>";
-        
+		
         // depth 만큼 들여쓰기
         var loopNum = list["depth"];
         for(j=0; j<loopNum; j++) {
@@ -778,6 +793,7 @@ function getReplyList(page) {
 	    	
 	    }, 
 	    error:function(e){  
+	    	sendRedirect(e.status);
 	    } 
 
 	});
@@ -922,6 +938,7 @@ function drawPagination(type, totalPages) {
 		    	
 		    }, 
 		    error:function(e){  
+		    	sendRedirect(e.status);
 		    } 
 
 		});
@@ -951,6 +968,7 @@ function getMemberList() {
 	    	
 	    }, 
 	    error:function(e){  
+	    	sendRedirect(e.status);
 	    } 
 
 	});
