@@ -11,7 +11,7 @@ function sendRedirect(status) {
 			break;
 		
 		default :
-			alert("문제가 발생하였습니다. 재로그인 하시기 바랍니다." + status);
+			alert("문제가 발생하였습니다. 재로그인 하시기 바랍니다.");
 			location.href = "/member/login";
 			break;
 	}

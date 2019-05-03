@@ -54,8 +54,4 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 	@Query("UPDATE BOARD b SET b.groupSeq = b.groupSeq + 1 WHERE " + delCheck + " AND b.groupNo = :groupNo AND b.groupSeq >= :groupSeq")
 	int updateGroupSeq(@Param("groupNo") int groupNo, @Param("groupSeq") double groupSeq);
 
-	// findAllOrdering
-	//@Query("SELECT b FROM BOARD b WHERE " + delCheck + " ORDER BY b.groupNo DESC, b.groupSeq ASC, b.depth ASC")
-	//Page<Board> findAllOrdering(Pageable page);
-	
 } 

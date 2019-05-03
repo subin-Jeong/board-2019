@@ -208,7 +208,7 @@ public class WebInterceptor implements HandlerInterceptor {
 			
 		} else {
 
-			// 페이지 내에서의 다운로드는 허용
+			// 페이지 내에서의 첨부파일 다운로드는 허용
 			String path = requestMap.get("path");
 			if(ApiUtils.isNotNullString(path) && path.contains("/download")) {
 				return true;

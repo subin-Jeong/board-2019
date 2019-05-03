@@ -74,10 +74,9 @@ public class SecurityHandler implements AuthenticationSuccessHandler, Authentica
 				// 추후 access_token 재발급을 위해 refresh_token 저장
 				if(ApiUtils.isNotNullString(userName) && authInfo.has("refresh_token")) {
 					
-					String email = userName;
 					String refreshToken = authInfo.getString("refresh_token");
 					
-					memberRepository.updateRefreshTokenByEmail(email, refreshToken);
+					memberRepository.updateRefreshTokenByEmail(userName, refreshToken);
 				
 				}
 				
