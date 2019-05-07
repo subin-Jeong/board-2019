@@ -48,6 +48,9 @@ public class BoardController {
 	@Autowired
 	private MemberRepository memberRepository;
 	
+	@Autowired
+	private BoardSpecification boardSpecification;
+	
 	
 	/**
 	 * 전체 게시글 목록
@@ -95,7 +98,7 @@ public class BoardController {
 		PageRequest pageRequest = new PageRequest(pageNum - 1, pageSize, sort);
 	
 		// 글목록 가져오기
-		return boardRepository.findAll(BoardSpecification.list(request.getParameterMap()), pageRequest);
+		return boardRepository.findAll(boardSpecification.list(request.getParameterMap()), pageRequest);
 		
 	}
 	

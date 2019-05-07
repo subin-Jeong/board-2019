@@ -13,6 +13,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 
 import com.estsoft.api.domain.Board;
 import com.estsoft.util.ApiUtils;
@@ -21,6 +22,7 @@ import com.estsoft.util.ApiUtils;
  * Board Repository 명세 정의
  * @author JSB
  */
+@Component
 public class BoardSpecification {
 	
 	/**
@@ -28,7 +30,7 @@ public class BoardSpecification {
 	 * @param searchParams
 	 * @return Specification<Board>
 	 */
-	public static Specification<Board> list(final Map<String, String[]> searchParams) {
+	public Specification<Board> list(final Map<String, String[]> searchParams) {
 		
 		return new Specification<Board>() {
 
