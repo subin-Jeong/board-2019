@@ -1,9 +1,14 @@
 buildscript {
+	ext {
+        querydslPluginVersion = '1.0.10'
+    }
 	repositories {
 		mavenCentral()
+		maven { url 'https://plugins.gradle.org/m2/' }
 	}
 	dependencies {
 		classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE'
+		classpath 'gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10'
 	}
 }
 
@@ -11,7 +16,10 @@ plugins {
 	id 'java'
 }
 
+apply plugin: 'java'
+apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 group = 'com.estsoft'
 version = '0.0.1-SNAPSHOT'
@@ -23,7 +31,7 @@ repositories {
 
 dependencies {
 	compile 'org.springframework.boot:spring-boot-starter-data-jpa'
-	compile "org.springframework.boot:spring-boot-configuration-processor"
+	compile 'org.springframework.boot:spring-boot-configuration-processor'
 	compile 'org.springframework.boot:spring-boot-starter-web'	
 	compile 'org.springframework.boot:spring-boot-starter-data-rest'
 	compile 'org.springframework.security.oauth:spring-security-oauth2'
@@ -41,6 +49,27 @@ dependencies {
 	compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.6'
 	
 	compile group: 'org.apache.commons', name: 'commons-text', version: '1.6'
+	
+	compile 'com.querydsl:querydsl-jpa'
+    compile 'com.querydsl:querydsl-apt'
 
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
+
+// querydsl Àû¿ë
+apply plugin: 'com.ewerk.gradle.plugins.querydsl'
+def querydslSrcDir = 'src/main/java'
+
+querydsl {
+    library = 'com.querydsl:querydsl-apt'
+    jpa = true
+    querydslSourcesDir = querydslSrcDir
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', querydslSrcDir]
+        }
+    }
 }
